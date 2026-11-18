@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cave · V2 · Séries et classement</title>
+<!--
+  Planche V2 — page « Séries & classement » (vue étendue) — style V2 validé.
+  CSS et JS partagés injectés depuis 01-verre-souffle.src.html par build.py. Aucune requête réseau.
+  Les noms et chiffres de la communauté sont des données de démo (le serveur ne les stocke pas encore).
+-->
+<style>
+/*SHARED_CSS*/
+
+  /* ---------- Séries & classement ---------- */
+  .game.board { grid-template-columns:1fr; grid-template-rows:auto auto auto minmax(0,1fr) auto;
+    grid-template-areas:"head" "today" "mine" "list" "bar"; }
+  .board .seg { display:flex; gap:2px; padding:4px; border-radius:999px; }
+  .board .seg span { height:28px; padding:0 12px; border-radius:999px; font:600 12px/28px var(--f); white-space:nowrap; }
+  .board .seg .on { background:var(--ink); color:#fff; }
+  .today { grid-area:today; display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+  .today > div { padding:10px 12px; display:flex; flex-direction:column; gap:4px; border-radius:18px; }
+  .today .num { font-size:30px; }
+  .today > .hist { display:none; }
+  .mine { grid-area:mine; padding:12px 14px; display:grid; grid-template-columns:auto 1fr; gap:6px 16px; align-items:center; }
+  .mine .num { font-size:52px; }
+  .mine .lbl { font:700 10px/1.3 var(--mono); letter-spacing:.08em; text-transform:uppercase; color:var(--ink-60); }
+  .cal { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; justify-items:center; }
+  .cal span { font:700 8.5px/1 var(--mono); color:var(--ink-60); }
+  .cal b { width:14px; height:14px; border-radius:50%; display:block; }
+  .cal b.pre { background:rgba(11,42,23,.08); }
+  .cal b.ok { background:var(--ink); box-shadow:inset 0 -2px 3px rgba(0,0,0,.25); }
+  .cal b.now { background:var(--ink); outline:2px solid var(--live); outline-offset:1.5px; }
+  .cal b.fut { border:1.5px dashed rgba(11,42,23,.25); }
+  .cal b.miss { border:1.5px solid rgba(11,42,23,.45); background:transparent; }
+  .mine .cal { grid-column:2; grid-row:1 / span 2; }
+  .list { grid-area:list; padding:12px 12px 10px; display:flex; flex-direction:column; gap:5px; min-height:0; overflow:hidden; }
+  .row { display:grid; grid-template-columns:26px minmax(0,1fr) auto 44px; align-items:center; gap:8px; background:rgba(255,255,255,.55); border-radius:12px; padding:6px 10px; min-height:34px; }
+  .row .rk { font:700 11px/1 var(--mono); color:var(--ink-60); }
+  .row .who { font-weight:700; font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .row .tm { font:900 20px/1 var(--f); font-stretch:66%; font-variant-numeric:tabular-nums; }
+  .row .st { justify-self:end; font:700 10px/1 var(--f); background:rgba(11,42,23,.12); border-radius:999px; padding:3px 7px; white-space:nowrap; }
+  .row.me { background:var(--ink); color:#fff; }
+  .row.me .rk { color:rgba(255,255,255,.6); }
+  .row.me .st { background:rgba(255,255,255,.2); }
+  .gap { text-align:center; font:700 11px/1 var(--mono); color:var(--ink-60); letter-spacing:.2em; padding:1px 0; }
+  .board .bar .stat .mono { font:700 13px/1 var(--mono); }
+  .ghostbtn { height:42px; border-radius:999px; padding:0 16px; border:1.5px solid var(--ink); background:transparent; font:700 13px/1 var(--f); color:var(--ink); white-space:nowrap; cursor:pointer; flex:none; }
+
+  @container (min-width: 760px) {
+    .game.board { grid-template-columns:280px minmax(0,1fr) 250px; grid-template-rows:auto minmax(0,1fr) auto;
+      grid-template-areas:"head head head" "mine list today" "mine bar today"; }
+    .today { grid-template-columns:1fr; align-content:start; gap:12px; }
+    .today > div { border-radius:22px; padding:14px 16px; }
+    .today .num { font-size:44px; }
+    .today > .hist { display:flex; flex-direction:column; gap:8px; }
+    .bars { display:grid; grid-template-columns:repeat(6,1fr); gap:5px; align-items:end; height:92px; }
+    .bars i { display:block; border-radius:6px 6px 3px 3px; background:rgba(11,42,23,.22); }
+    .bars i.me { background:var(--ink); }
+    .bars-l { display:grid; grid-template-columns:repeat(6,1fr); gap:5px; font:700 9px/1 var(--mono); color:var(--ink-60); text-align:center; }
+    .mine { grid-template-columns:1fr; align-content:start; padding:18px 18px; gap:10px; }
+    .mine .num { font-size:96px; }
+    .mine .cal { grid-column:auto; grid-row:auto; gap:8px 6px; margin-top:6px; }
+    .cal b { width:24px; height:24px; }
+    .list { padding:16px; gap:6px; }
+    .row { min-height:44px; grid-template-columns:30px minmax(0,1fr) auto 56px; }
+    .row .tm { font-size:24px; }
+    .board .bar { max-width:520px; justify-self:center; width:100%; }
+  }
+</style>
+</head>
+<body>
+
+<header class="board-head">
+  <div>
+    <div class="label">Cave · V2 · page « Séries & classement » · vue étendue</div>
+    <h1>séries & <span>classement</span></h1>
+    <p>La page de la communauté : ma série, le classement du jour (au temps), et les chiffres du banc (combien ont joué, combien ont réussi, la répartition des temps).</p>
+    <p>On y arrive depuis la carte de fin. Rien sur le karma, aucune mascotte : seulement le banc du jour et le temps de chacun.</p>
+  </div>
+  <div>
+    <h2 class="label">Ce qu'on garde du style</h2>
+    <ul style="margin:0;padding-left:18px;color:#3a3646">
+      <li>Lignes de classement = lignes du carnet LabKit (blanc 55 %, rayon 12) ; ma ligne à l'encre.</li>
+      <li>Calendrier en points de substance : encre = résolu, cercle `#ff5a3d` = aujourd'hui.</li>
+      <li>Chiffres condensés géants pour la série et les totaux.</li>
+    </ul>
+  </div>
+  <div>
+    <h2 class="label">Données</h2>
+    <p><b>Démo.</b> Les pseudos, les temps des autres et les totaux du jour n'existent pas encore côté serveur : la page dépend de la question 4 de PAGES.md.</p>
+  </div>
+</header>
+
+<main class="frames">
+  <figure>
+    <figcaption><span class="label">Desktop 1440 × 900 · vue étendue</span><button class="scale-btn" data-target="d1">1:1</button></figcaption>
+    <div class="viewport v-desk" id="d1">
+      <div class="screen" style="width:1440px;height:900px">
+        <div class="feed">
+          <div class="top"><div class="logo"></div><div class="search"></div><div class="me"></div></div>
+          <div class="rail"><i style="width:70%"></i><i style="width:55%"></i><i style="width:80%"></i><i style="width:40%"></i><i style="width:65%"></i></div>
+          <div class="col"><div class="card"><div class="post-h"><span class="av"></span><b>r/CaveBench</b> · 3 h</div><div class="post-t">Bench 06 — five unlabeled flasks, one experiment</div><div class="ghost-box"></div></div></div>
+          <div class="scrim"></div>
+          <div class="modal"><div class="bar-h"><span>Cave</span><span class="x">×</span></div><div class="slot"></div></div>
+        </div>
+      </div>
+    </div>
+  </figure>
+  <figure>
+    <figcaption><span class="label">Mobile 390 × 844</span><button class="scale-btn" data-target="m1">1:1</button></figcaption>
+    <div class="viewport v-mob" id="m1">
+      <div class="screen" style="width:390px;height:844px">
+        <div class="phone">
+          <div class="status"><span>9:41</span><span><i></i><i></i><i style="width:24px"></i></span></div>
+          <div class="m-bar"><span class="x">×</span><span>Cave · r/CaveBench</span><span style="width:28px"></span></div>
+          <div class="slot"></div>
+          <div class="home-ind"></div>
+        </div>
+      </div>
+    </div>
+  </figure>
+</main>
+
+<section class="notes">
+  <div><div class="label">Ce qu'on voit</div><ul><li>Le joueur a résolu le banc 06 en 01:47 : 9e du jour, série de 6 (tous les bancs depuis le lancement le 09/12).</li><li>Top 5 + la ligne du joueur ; « · · · » marque le saut.</li></ul></div>
+  <div><div class="label">Mobile</div><ul><li>Les trois chiffres du jour en haut, la série compacte avec le calendrier de décembre, puis le classement : tout tient sans défiler.</li><li>L'histogramme des temps n'apparaît que sur desktop.</li></ul></div>
+  <div><div class="label">À trancher</div><ul><li>Classement au temps seul, ou série d'abord ? Les planches classent au temps, et la série est affichée en puce.</li><li>Les pseudos Reddit sont-ils affichés tels quels ? Les planches les montrent (données publiques du fil).</li></ul></div>
+</section>
+
+<section class="states">
+  <div class="label">États · échelle 1:1</div>
+  <div class="states-row" id="states" style="grid-template-columns:repeat(3,auto)"></div>
+</section>
+
+<template id="board-tpl">
+  <div class="game board">
+    <header class="g-head">
+      <div class="brand">
+        <svg viewBox="0 0 26 34" aria-hidden="true"><rect x="8" y="1" width="10" height="7" rx="2" fill="#0b2a17"/><path d="M9 8 V12 C9 14 3 15 3 19 V29 Q3 33 7 33 H19 Q23 33 23 29 V19 C23 15 17 14 17 12 V8" fill="rgba(255,255,255,.35)" stroke="#0b2a17" stroke-width="2" stroke-linejoin="round"/><path d="M3.5 22 Q13 24.5 22.5 22 V29 Q22.5 32.5 19 32.5 H7 Q3.5 32.5 3.5 29 Z" fill="#0b2a17"/></svg>
+        <div><b>cave</b><small>Bench 06 · Mon 14 Dec</small></div>
+      </div>
+      <div class="seg gx"><span class="on">Today</span><span>All benches</span></div>
+    </header>
+
+    <section class="today">
+      <div class="gx"><span class="cap-t"><span>Chemists</span></span><span class="num">1,284</span></div>
+      <div class="gx"><span class="cap-t"><span>Solved</span></span><span class="num">71%</span></div>
+      <div class="gx"><span class="cap-t"><span>Median</span></span><span class="num">02:31</span></div>
+      <div class="gx hist">
+        <span class="cap-t"><span>Times</span><small>you: 1–2 min</small></span>
+        <div class="bars"><i style="height:22%"></i><i class="me" style="height:64%"></i><i style="height:100%"></i><i style="height:58%"></i><i style="height:30%"></i><i style="height:18%"></i></div>
+        <div class="bars-l"><span>&lt;1</span><span>1–2</span><span>2–3</span><span>3–4</span><span>4–5</span><span>5+</span></div>
+      </div>
+    </section>
+
+    <section class="mine gx">
+      <div><div class="lbl">Your streak</div><div class="num">6</div><div class="lbl">best 6 · every bench since 09 Dec</div></div>
+      <div class="cal" aria-label="December"></div>
+    </section>
+
+    <section class="list gx">
+      <div class="cap-t"><span>Bench 06 · fastest</span><small>by time to cork</small></div>
+      <div class="rows"></div>
+    </section>
+
+    <div class="bar gx">
+      <div class="stat"><span>Next bench in <span class="mono">09:12:44</span></span></div>
+      <button class="ghostbtn">Back to my card</button>
+    </div>
+  </div>
+</template>
+
+<script>
+/*SHARED_JS*/
+
+  // Démo : classement du banc 06 (pseudos inventés, temps plausibles).
+  const ROWS = [
+    [1, 'u/meniscus_m', '00:38', 12], [2, 'u/corkscrew', '00:52', 6], [3, 'u/flaskwise', '01:05', 4],
+    [4, 'u/argon_ann', '01:21', 6], [5, 'u/titrate_me', '01:33', 2], null, [9, 'u/benchhand · you', '01:47', 6, true]
+  ];
+  const row = r => r ? `<div class="row${r[4] ? ' me' : ''}"><span class="rk">${String(r[0]).padStart(2,'0')}</span><span class="who">${r[1]}</span><span class="tm">${r[2]}</span><span class="st">${r[3]} d</span></div>` : '<div class="gap">· · ·</div>';
+  // Décembre 2026 commence un mardi. Lancement le 09/12, aujourd'hui le 14/12.
+  function cal() {
+    let h = ['M','T','W','T','F','S','S'].map(d => `<span>${d}</span>`).join('') + '<b style="visibility:hidden"></b>';
+    for (let d = 1; d <= 31; d++) {
+      const cls = d < 9 ? 'pre' : d < 14 ? 'ok' : d === 14 ? 'now' : 'fut';
+      h += `<b class="${cls}" title="Dec ${d}"></b>`;
+    }
+    return h;
+  }
+  function mount(slot) {
+    const node = document.getElementById('board-tpl').content.cloneNode(true);
+    node.querySelector('.rows').innerHTML = ROWS.map(row).join('');
+    node.querySelector('.cal').innerHTML = cal();
+    slot.appendChild(node);
+  }
+  document.querySelectorAll('.slot').forEach(mount);
+
+  const wrap = (html, w) => `<div class="game board" style="display:block;height:auto;padding:0;background:none;${w ? 'width:' + w + 'px' : ''}">${html}</div>`;
+  document.getElementById('states').innerHTML = `
+    <div class="state">${wrap(`<div class="row me">${'<span class="rk">09</span><span class="who">u/benchhand · you</span><span class="tm">01:47</span><span class="st">6 d</span>'}</div><div style="height:6px"></div><div class="row"><span class="rk">—</span><span class="who">u/benchhand · you</span><span class="tm" style="opacity:.5">--:--</span><span class="st">5 d</span></div>`, 330)}<em>Ma ligne · résolu / pas encore joué</em></div>
+    <div class="state">${wrap(`<div class="cal" style="grid-template-columns:repeat(5,auto);gap:10px"><b class="ok"></b><b class="now"></b><b class="miss"></b><b class="pre"></b><b class="fut"></b></div>
+      <div style="display:grid;grid-template-columns:repeat(5,auto);gap:10px;font:700 9px/1 var(--mono);color:rgba(11,42,23,.6);margin-top:6px"><span>résolu</span><span>auj.</span><span>raté</span><span>avant</span><span>à venir</span></div>`)}<em>Calendrier · légende</em></div>
+    <div class="state">${wrap(`<div class="seg gx" style="display:inline-flex"><span>Today</span><span class="on">All benches</span></div>`)}<em>Onglet « All benches » (classement des séries)</em></div>`;
+</script>
+</body>
+</html>
