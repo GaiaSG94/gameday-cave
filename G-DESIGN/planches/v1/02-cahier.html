@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cave · V1 · 02 Cahier</title>
+<!--
+  Planche V1 — page « Jeu » — direction 02 Cahier.
+  Fichier autonome : aucune police, image ou script externe.
+  Données de démo réelles : generateCave('2026-12-14') (src/shared/puzzle.ts).
+-->
+<style id="board">
+  /* ---------- Planche (neutre, identique sur les 3 directions) ---------- */
+  :root { --board-bg:#d9d8d4; --board-ink:#1d1d1b; --board-muted:#62615c; --board-line:#bdbbb5; }
+  * { box-sizing:border-box; }
+  html,body { margin:0; }
+  body { background:var(--board-bg); color:var(--board-ink); font:14px/1.45 "Ubuntu Sans","Noto Sans","Helvetica Neue",Arial,sans-serif; min-width:1400px; }
+  .board-head { display:grid; grid-template-columns: 1.15fr 1fr 0.9fr; gap:40px; padding:36px 48px 28px; border-bottom:1px solid var(--board-line); }
+  .board-head h1 { margin:0 0 6px; font-size:28px; letter-spacing:-0.01em; }
+  .board-head .kicker { font:600 11px/1 "Ubuntu Sans Mono","Noto Sans Mono",monospace; letter-spacing:.14em; text-transform:uppercase; color:var(--board-muted); margin-bottom:10px; }
+  .board-head p { margin:0 0 6px; color:#3a3936; max-width:56ch; }
+  .board-head h2 { font:600 11px/1 "Ubuntu Sans Mono","Noto Sans Mono",monospace; letter-spacing:.14em; text-transform:uppercase; color:var(--board-muted); margin:0 0 12px; }
+  .chips { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+  .chip { border-radius:6px; overflow:hidden; border:1px solid rgba(0,0,0,.12); background:#fff; }
+  .chip i { display:block; height:42px; }
+  .chip span { display:block; padding:6px 8px; font:11px/1.3 "Ubuntu Sans Mono","Noto Sans Mono",monospace; }
+  .chip b { display:block; font:600 11px/1.3 "Ubuntu Sans","Noto Sans",sans-serif; }
+  .specimen { background:#fff; border:1px solid rgba(0,0,0,.12); border-radius:6px; padding:14px 16px; }
+  .frames { display:flex; gap:40px; align-items:flex-start; padding:28px 48px 8px; }
+  figure { margin:0; }
+  figcaption { font:600 11px/1 "Ubuntu Sans Mono","Noto Sans Mono",monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--board-muted); margin-bottom:10px; display:flex; gap:12px; align-items:center; }
+  .scale-btn { font:inherit; letter-spacing:inherit; text-transform:inherit; border:1px solid var(--board-line); background:#fff; border-radius:4px; padding:4px 8px; cursor:pointer; color:var(--board-ink); }
+  .viewport { --s:.7; overflow:hidden; border-radius:10px; box-shadow:0 1px 0 rgba(0,0,0,.08), 0 18px 40px -18px rgba(0,0,0,.45); background:#000; }
+  .v-desk { width:calc(1440px * var(--s)); height:calc(900px * var(--s)); }
+  .v-mob  { width:calc(390px * var(--s)); height:calc(844px * var(--s)); border-radius:calc(44px * var(--s)); }
+  .screen { transform:scale(var(--s)); transform-origin:0 0; position:relative; overflow:hidden; }
+  .notes { padding:20px 48px 8px; display:grid; grid-template-columns:repeat(3,1fr); gap:24px; color:#3a3936; }
+  .notes h3 { font:600 11px/1 "Ubuntu Sans Mono","Noto Sans Mono",monospace; letter-spacing:.14em; text-transform:uppercase; color:var(--board-muted); margin:0 0 8px; }
+  .notes ul { margin:0; padding-left:18px; }
+  .states { margin:20px 48px 48px; border-radius:10px; overflow:hidden; }
+  .states > h3 { font:600 11px/1 "Ubuntu Sans Mono","Noto Sans Mono",monospace; letter-spacing:.14em; text-transform:uppercase; color:var(--board-muted); margin:0 0 10px; }
+
+  /* ---------- Chrome du fil (neutre, générique, sans marque) ---------- */
+  .feed { position:absolute; inset:0; background:#eceef0; font-family:"Ubuntu Sans","Noto Sans",Arial,sans-serif; color:#1c1c1c; }
+  .feed .top { height:56px; background:#fff; border-bottom:1px solid #dfe1e3; display:flex; align-items:center; gap:16px; padding:0 20px; }
+  .feed .top .logo { width:32px; height:32px; border-radius:50%; background:#c9ccd0; }
+  .feed .top .search { flex:0 0 560px; margin:0 auto; height:38px; border-radius:20px; background:#eef0f2; }
+  .feed .top .me { width:32px; height:32px; border-radius:50%; background:#c9ccd0; }
+  .feed .rail { position:absolute; left:0; top:56px; bottom:0; width:260px; border-right:1px solid #dfe1e3; background:#fff; padding:20px; }
+  .feed .rail i { display:block; height:12px; border-radius:6px; background:#e3e5e8; margin:14px 0; }
+  .feed .col { position:absolute; left:340px; top:80px; width:740px; }
+  .card { background:#fff; border:1px solid #dfe1e3; border-radius:12px; padding:14px 16px; margin-bottom:16px; }
+  .post-h { display:flex; align-items:center; gap:8px; font-size:12px; color:#576f76; }
+  .post-h .av { width:24px; height:24px; border-radius:50%; background:#121417; }
+  .post-h b { color:#1c1c1c; }
+  .post-t { font-size:18px; font-weight:600; margin:8px 0 10px; color:#1c1c1c; }
+  .ghost { height:300px; border-radius:10px; background:#e7e9eb; }
+  .scrim { position:absolute; inset:0; background:rgba(10,12,14,.62); }
+  .modal { position:absolute; left:50%; top:46px; transform:translateX(-50%); width:1000px; height:808px; border-radius:16px; overflow:hidden; box-shadow:0 30px 80px rgba(0,0,0,.5); }
+  .modal .bar, .m-bar { height:44px; display:flex; align-items:center; justify-content:space-between; padding:0 14px; background:#fff; border-bottom:1px solid #dfe1e3; font:600 13px/1 "Ubuntu Sans","Noto Sans",Arial,sans-serif; color:#1c1c1c; }
+  .x { width:28px; height:28px; border-radius:50%; background:#eef0f2; display:grid; place-items:center; font-size:16px; color:#3b3b3b; }
+  .slot { container-type:size; }
+  .modal .slot { height:calc(100% - 44px); }
+  .phone { position:absolute; inset:0; background:#fff; }
+  .status { height:44px; display:flex; align-items:center; justify-content:space-between; padding:0 26px; font:600 14px/1 "Ubuntu Sans","Noto Sans",Arial,sans-serif; color:#1c1c1c; background:#fff; }
+  .status i { display:inline-block; width:18px; height:10px; border-radius:2px; background:#1c1c1c; margin-left:4px; }
+  .phone .slot { position:absolute; top:88px; left:0; right:0; bottom:0; }
+  .home-ind { position:absolute; bottom:8px; left:50%; transform:translateX(-50%); width:134px; height:5px; border-radius:3px; background:rgba(255,255,255,.55); z-index:3; }
+</style>
+
+<style id="direction">
+  /* ================== DIRECTION 02 — CAHIER ==================
+     Le cahier de manip : papier quadrillé, encre, un seul bleu d'encre comme accent.
+     Les flacons sont des croquis à la plume ; les liquides sont hachurés à la main.
+     Elle s'écarte volontairement du fond sombre du brief. */
+  .game {
+    --bg:#f2eee4; --surface:#fbf8f1; --raise:#ffffff; --line:#d8d0bf; --line-2:#b9ae98; --grid:rgba(39,71,199,.07);
+    --ink:#1e2631; --muted:#6c6455; --faint:#a39a88;
+    --accent:#2747c7; --accent-ink:#ffffff; --cork:#b08350; --alert:#c8402f;
+    --font:"Inter","Helvetica Neue","Ubuntu Sans","Noto Sans",Arial,sans-serif;
+    --serif:"Iowan Old Style","Charter","Noto Serif","DejaVu Serif",Georgia,serif;
+    --mono:"JetBrains Mono","IBM Plex Mono","Ubuntu Sans Mono","Noto Sans Mono",Menlo,monospace;
+    position:relative; height:100%; overflow:hidden;
+    background:
+      linear-gradient(var(--grid) 1px, transparent 1px) 0 0/16px 16px,
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px) 0 0/16px 16px,
+      var(--bg);
+    color:var(--ink); font:400 14px/1.4 var(--font);
+    display:grid; gap:10px; padding:12px 16px 26px;
+    grid-template-rows:auto auto auto auto 1fr auto;
+    grid-template-areas: "head" "rule" "rack" "ledger" "pour" "cap";
+  }
+  .g-head { grid-area:head; display:flex; align-items:flex-end; justify-content:space-between; border-bottom:2px solid var(--ink); padding-bottom:8px; }
+  .brand { font:italic 600 30px/1 var(--serif); letter-spacing:-0.01em; }
+  .brand small { display:block; font:500 10.5px/1 var(--mono); font-style:normal; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-top:6px; }
+  .stats { display:flex; gap:14px; font:500 12px/1 var(--mono); color:var(--muted); }
+  .stats span { padding:0; }
+  .stats .streak b { color:var(--accent); font-weight:700; }
+  .rule { grid-area:rule; margin:0; color:var(--muted); font:italic 13px/1.3 var(--serif); }
+  .rule b { color:var(--ink); font-weight:600; }
+
+  .rack { grid-area:rack; position:relative; display:grid; grid-template-columns:repeat(5,1fr); padding:6px 4px 0; }
+  .rack::after { content:""; position:absolute; left:0; right:0; bottom:46px; height:0; border-top:1.5px solid var(--ink); }
+  .flask { display:flex; flex-direction:column; align-items:center; gap:4px; position:relative; }
+  .flask svg { width:38px; height:96px; overflow:visible; }
+  .glass { fill:none; stroke:var(--ink); stroke-width:1.6; stroke-linejoin:round; }
+  .shine { stroke:var(--ink); stroke-width:.8; opacity:.35; fill:none; stroke-dasharray:14 4 3 4; }
+  .ticks { stroke:var(--ink); stroke-width:.8; opacity:.55; }
+  .cork { fill:url(#p-cork); stroke:var(--ink); stroke-width:1.2; }
+  .cork-line { stroke:none; }
+  .level-mark { stroke:var(--faint); stroke-dasharray:1.5 3; stroke-width:1; }
+  .liq { stroke:none; }
+  .men { fill:none; stroke:var(--ink); stroke-width:1.6; stroke-linecap:round; }
+  .liq.water  { fill:url(#p-water); }
+  .liq.wine   { fill:url(#p-wine); }
+  .liq.oil    { fill:url(#p-oil); }
+  .liq.honey  { fill:url(#p-honey); }
+  .liq.poison { fill:url(#p-poison); }
+  .pat-line { stroke:var(--ink); stroke-width:.9; fill:none; }
+  .pat-dot  { fill:var(--ink); }
+  .pat-bg   { fill:none; }
+  .flask.fresh .glass, .flask.fresh .men { stroke:var(--accent); }
+  .flask.fresh .pat-line { stroke:var(--accent); }
+  .flask.fresh::after { content:""; position:absolute; top:-4px; left:50%; width:58px; height:110px; transform:translateX(-50%) rotate(-3deg); border:1.6px solid var(--accent); border-radius:48% 52% 46% 54% / 40% 44% 56% 60%; pointer-events:none; }
+  .tag { text-align:center; min-height:30px; padding:3px 6px 4px; margin-top:2px; background:var(--raise); border:1px solid var(--line); box-shadow:0 1px 0 var(--line); transform:rotate(-2deg); min-width:60px; }
+  .flask:nth-child(even) .tag { transform:rotate(1.5deg); }
+  .tag .n { font:600 9.5px/1 var(--mono); letter-spacing:.08em; color:var(--muted); }
+  .tag .nm { display:block; font:italic 600 14px/1.15 var(--serif); margin-top:2px; }
+  .tag .f { display:block; font:400 9.5px/1.2 var(--mono); color:var(--muted); }
+  .flask.empty .tag { background:transparent; border-style:dashed; box-shadow:none; }
+  .flask.empty .nm { color:var(--faint); font-weight:400; }
+
+  .ledger { grid-area:ledger; }
+  .ledger h3, .pour h3 { margin:0 0 6px; font:600 10.5px/1 var(--mono); letter-spacing:.12em; text-transform:uppercase; color:var(--muted); display:flex; justify-content:space-between; }
+  .ledger ol { list-style:none; margin:0; padding:0; }
+  .ledger li { display:grid; grid-template-columns:24px 1fr; gap:4px; font:15px/1.3 var(--serif); padding:3px 0; border-bottom:1px solid var(--line); }
+  .ledger li span { font:500 11px/1.8 var(--mono); color:var(--accent); }
+  .ledger b { font-weight:700; }
+
+  .pour { grid-area:pour; align-self:start; }
+  .grid { display:grid; grid-template-columns:92px repeat(5,1fr); gap:0; border-top:1.5px solid var(--ink); }
+  .grid > * { border-bottom:1px solid var(--line); }
+  .grid .hd { font:500 10.5px/1 var(--mono); color:var(--muted); text-align:center; padding:8px 0 6px; }
+  .grid .lq { display:flex; flex-direction:column; justify-content:center; padding-left:2px; }
+  .grid .lq b { font:italic 600 14px/1.1 var(--serif); }
+  .grid .lq i { font:400 9.5px/1.2 var(--mono); color:var(--muted); font-style:normal; }
+  .cell { height:32px; border:0; border-bottom:1px solid var(--line); border-left:1px dashed var(--line); background:transparent; display:grid; place-items:center; font:500 11px/1 var(--mono); color:var(--faint); cursor:pointer; padding:0; border-radius:0; }
+  .cell:hover, .cell.hover { background:rgba(39,71,199,.06); color:var(--accent); }
+  .cell.on span { display:none; }
+  .cell.on::before { content:""; width:22px; height:22px; border:2px solid var(--accent); border-radius:52% 48% 55% 45% / 48% 55% 45% 52%; background:rgba(39,71,199,.10); transform:rotate(-8deg); }
+  .cell.taken { color:transparent; background-image:linear-gradient(135deg, transparent 47%, rgba(30,38,49,.18) 48% 52%, transparent 53%); background-size:16px 16px; background-position:center; background-repeat:no-repeat; }
+
+  .cap { grid-area:cap; height:50px; border-radius:4px; border:1.5px dashed var(--line-2); background:transparent; color:var(--muted); font:600 14px/1 var(--font); display:flex; align-items:center; justify-content:center; gap:12px; cursor:not-allowed; }
+  .cap .lv { display:flex; gap:3px; }
+  .cap .lv i { width:10px; height:3px; background:var(--line-2); }
+  .cap .lv i.f { background:var(--accent); }
+  .cap.ready { background:var(--accent); border:1.5px solid var(--accent); color:var(--accent-ink); cursor:pointer; box-shadow:3px 3px 0 var(--ink); }
+  .cap.ready .lv i { background:rgba(255,255,255,.85); }
+
+  @container (min-width: 760px) {
+    .game { padding:28px 40px 28px; gap:18px 44px; grid-template-columns:1.25fr 1fr;
+      grid-template-rows:auto auto auto 1fr auto;
+      grid-template-areas: "head head" "rule rule" "rack ledger" "pour ledger" "pour cap"; }
+    .brand { font-size:40px; }
+    .flask svg { width:58px; height:146px; }
+    .flask.fresh::after { width:86px; height:162px; }
+    .rack::after { bottom:50px; }
+    .ledger { background:var(--surface); border:1px solid var(--line); padding:16px 18px 8px; align-self:start; box-shadow:4px 4px 0 rgba(30,38,49,.08); }
+    .ledger li { font-size:17px; padding:10px 0; }
+    .cell { height:44px; }
+    .grid { grid-template-columns:120px repeat(5,1fr); }
+    .cap { height:56px; font-size:15px; }
+  }
+
+  .states-row { display:grid; grid-template-columns:repeat(6,auto); gap:28px; align-items:end; padding:22px 28px; background:#f2eee4; color:#1e2631; border-radius:10px; border:1px solid #d8d0bf; }
+  .state { display:flex; flex-direction:column; gap:10px; align-items:center; }
+  .state > em { font:500 10px/1 "Ubuntu Sans Mono","Noto Sans Mono",monospace; letter-spacing:.1em; text-transform:uppercase; color:#6c6455; font-style:normal; }
+  .toast { padding:12px 14px; font:14px/1.35 "Noto Serif",Georgia,serif; width:240px; border:1px solid #d8d0bf; background:#fbf8f1; }
+  .toast b { display:block; font:600 11px/1.2 "Ubuntu Sans Mono",monospace; letter-spacing:.1em; text-transform:uppercase; margin-bottom:4px; }
+  .toast.ok { border-left:3px solid #2747c7; } .toast.ok b { color:#2747c7; }
+  .toast.bad { border-left:3px solid #c8402f; } .toast.bad b { color:#c8402f; }
+  .loading { width:200px; height:90px; display:grid; place-items:center; font:italic 14px/1 "Noto Serif",Georgia,serif; color:#6c6455; border:1px dashed #b9ae98; }
+  .loading i { display:block; width:60px; height:0; border-top:1.5px solid #2747c7; margin:10px auto 0; }
+
+</style>
+</head>
+<body>
+
+<header class="board-head">
+  <div>
+    <div class="kicker">Cave · V1 · page « Jeu » · direction 02 / 03</div>
+    <h1>Cahier</h1>
+    <p>Le carnet de manip d'un chimiste : papier quadrillé, croquis à la plume, étiquettes collées un peu de travers. C'est la direction qui quitte le fond sombre.</p>
+    <p>Un seul bleu d'encre comme accent : il entoure ce que le joueur vient de verser, comme on entoure un résultat au stylo.</p>
+    <p>Les liquides sont hachurés à la main, les noms écrits en italique : « étiqueté à la main » sans police manuscrite.</p>
+  </div>
+  <div>
+    <h2>Palette</h2>
+    <div class="chips">
+      <div class="chip"><i style="background:#f2eee4"></i><span><b>Papier</b>#f2eee4</span></div>
+      <div class="chip"><i style="background:#2747c7"></i><span><b>Encre bleue · accent</b>#2747c7</span></div>
+      <div class="chip"><i style="background:#1e2631"></i><span><b>Encre noire</b>#1e2631</span></div>
+      <div class="chip"><i style="background:#b08350"></i><span><b>Liège · matière</b>#b08350</span></div>
+      <div class="chip"><i style="background:#c8402f"></i><span><b>Alerte · état</b>#c8402f</span></div>
+      <div class="chip"><i style="background:#d8d0bf"></i><span><b>Réglure</b>#d8d0bf</span></div>
+    </div>
+  </div>
+  <div>
+    <h2>Typo</h2>
+    <div class="specimen" style="background:#fbf8f1">
+      <div style="font:italic 600 32px/1 'Iowan Old Style',Charter,'Noto Serif',Georgia,serif">Cave</div>
+      <div style="font:italic 15px/1.5 'Noto Serif',Georgia,serif;margin-top:8px">Sérif italique — noms, indices, ton du carnet</div>
+      <div style="font:600 13px/1.5 Inter,'Ubuntu Sans',sans-serif">Grotesque — boutons et chiffres d'interface</div>
+      <div style="font:400 12px/1.5 'JetBrains Mono','Ubuntu Sans Mono',monospace;color:#6c6455">Mono — H₂O · C₂H₅OH · As₂O₃ · 01:12</div>
+    </div>
+  </div>
+
+</header>
+
+<main class="frames">
+  <figure>
+    <figcaption>Desktop 1440 × 900 · vue étendue <button class="scale-btn" data-target="d1">1:1</button></figcaption>
+    <div class="viewport v-desk" id="d1">
+      <div class="screen" style="width:1440px;height:900px">
+        <div class="feed">
+          <div class="top"><div class="logo"></div><div class="search"></div><div class="me"></div></div>
+          <div class="rail"><i style="width:70%"></i><i style="width:55%"></i><i style="width:80%"></i><i style="width:40%"></i><i style="width:65%"></i></div>
+          <div class="col">
+            <div class="card"><div class="post-h"><span class="av"></span><b>r/CaveBench</b> · 3 h</div><div class="post-t">Bench 06 — five unlabeled flasks, one experiment</div><div class="ghost"></div></div>
+          </div>
+          <div class="scrim"></div>
+          <div class="modal"><div class="bar"><span>Cave</span><span class="x">×</span></div><div class="slot"></div></div>
+        </div>
+      </div>
+    </div>
+  </figure>
+  <figure>
+    <figcaption>Mobile 390 × 844 <button class="scale-btn" data-target="m1">1:1</button></figcaption>
+    <div class="viewport v-mob" id="m1">
+      <div class="screen" style="width:390px;height:844px">
+        <div class="phone">
+          <div class="status"><span>9:41</span><span><i></i><i></i><i style="width:24px"></i></span></div>
+          <div class="m-bar"><span class="x">×</span><span>Cave · r/CaveBench</span><span style="width:28px"></span></div>
+          <div class="slot"></div>
+          <div class="home-ind"></div>
+        </div>
+      </div>
+    </div>
+  </figure>
+</main>
+
+<section class="notes">
+  <div><h3>Ce qu'on voit</h3><ul><li>Même partie (14/12), même état : 3/5 versés, le miel vient d'être entouré à l'encre bleue.</li><li>Les cases occupées sont barrées d'un trait, comme on raye une possibilité dans un carnet.</li></ul></div>
+  <div><h3>Pourquoi l'écart</h3><ul><li>Un fil Reddit est majoritairement clair : un post papier se distingue sans crier, et colle à « déduction par élimination ».</li><li>Risque : moins « verre et lumière », plus « papier ». Le liège et le ménisque restent.</li></ul></div>
+  <div><h3>Références appliquées</h3><ul><li>Noon : fond chaud clair, un seul accent, panneaux d'information posés comme des instruments.</li><li>Igloo : peu repris ici (la lumière cède la place au trait).</li></ul></div>
+
+</section>
+
+<section class="states">
+  <h3>États · échelle 1:1</h3>
+  <div class="states-row" id="states"></div>
+</section>
+
+<!-- ===================== Composant jeu (cloné dans les deux cadres) ===================== -->
+<template id="game-tpl">
+  <div class="game">
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+      <defs>
+        <pattern id="p-water" width="12" height="7" patternUnits="userSpaceOnUse"><path class="pat-line" d="M0 4 Q3 2 6 4 T12 4"/></pattern>
+        <pattern id="p-wine" width="3" height="3" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line class="pat-line" x1="0" y1="0" x2="0" y2="3"/></pattern>
+        <pattern id="p-oil" width="6" height="5" patternUnits="userSpaceOnUse"><line class="pat-line" x1="0" y1="2.5" x2="6" y2="2.5"/></pattern>
+        <pattern id="p-honey" width="6" height="6" patternUnits="userSpaceOnUse"><circle class="pat-dot" cx="3" cy="3" r="1"/></pattern>
+        <pattern id="p-poison" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line class="pat-line" x1="0" y1="0" x2="0" y2="6"/><line class="pat-line" x1="0" y1="3" x2="6" y2="3"/></pattern>
+        <pattern id="p-cork" width="4" height="4" patternUnits="userSpaceOnUse"><rect width="4" height="4" fill="#d9b88c"/><circle cx="1" cy="1" r=".6" fill="#8a6338"/><circle cx="3" cy="3" r=".5" fill="#8a6338"/></pattern>
+
+      </defs>
+    </svg>
+
+    <header class="g-head">
+      <div class="brand">Cave<small>Bench 06 · Mon 14 Dec</small></div>
+      <div class="stats"><span class="clock">01:12</span><span class="streak">Streak <b>5</b></span></div>
+    </header>
+    <p class="rule"><b>Pour each liquid into one flask.</b> Every ledger note must hold.</p>
+
+    <section class="rack" aria-label="Flask rack"></section>
+
+    <section class="ledger">
+      <h3><span>Ledger</span><span>4 notes</span></h3>
+      <ol>
+        <li><span>01</span><div>The <b>honey</b> sits immediately right of the <b>oil</b>.</div></li>
+        <li><span>02</span><div>The <b>poison</b> sits immediately right of the <b>honey</b>.</div></li>
+        <li><span>03</span><div>Flask 5 holds the <b>poison</b>.</div></li>
+        <li><span>04</span><div>The <b>water</b> sits immediately right of the <b>wine</b>.</div></li>
+      </ol>
+    </section>
+
+    <section class="pour">
+      <h3><span>Pour</span><span>tap a cell</span></h3>
+      <div class="grid"></div>
+    </section>
+
+    <button class="cap" disabled><span>Cap the rack</span><span class="lv"><i class="f"></i><i class="f"></i><i class="f"></i><i></i><i></i></span><span>3/5</span></button>
+  </div>
+</template>
+
+<script>
+  // Données de démo : generateCave('2026-12-14'), état en cours de partie.
+  const LIQ = { water:'H₂O', wine:'C₂H₅OH', oil:'C₁₈H₃₄O₂', honey:'C₆H₁₂O₆', poison:'As₂O₃' };
+  const ORDER = ['water','wine','oil','honey','poison'];
+  const POURED = [null, null, 'oil', 'honey', 'poison']; // flacons 1..5
+  const FRESH = 3; // index du dernier versement (flacon 4)
+
+  // Silhouette : flacon à réactif, col large, épaule courte (pas une bouteille).
+  // Silhouette : flacon à réactif, croqué à la plume.
+  const SHAPE = {
+    body:'M13 20 V25 C13 30 5 31 5 38 V108 Q5 116 13 116 H35 Q43 116 43 108 V38 C43 31 35 30 35 25 V20 Z',
+    liquid:'M5 55 Q6 60 12 60 H36 Q42 60 43 55 V108 Q43 116 35 116 H13 Q5 116 5 108 Z',
+    men:'M5.5 55 Q6.5 60 12 60 H36 Q41.5 60 42.5 55',
+    shine:'M10 42 V104', level:[8,60,40,60],
+    cork:'<rect class="cork" x="11" y="5" width="26" height="16" rx="3"/>'
+  };
+
+  function flaskSVG(content) {
+    return `<svg viewBox="0 0 48 120" aria-hidden="true">
+      <path class="glass" d="${SHAPE.body}"/>
+      ${content ? `<path class="liq ${content}" d="${SHAPE.liquid}"/><path class="men" d="${SHAPE.men}"/>` : `<line class="level-mark" x1="${SHAPE.level[0]}" y1="${SHAPE.level[1]}" x2="${SHAPE.level[2]}" y2="${SHAPE.level[3]}"/>`}
+      <path class="shine" d="${SHAPE.shine}"/>
+      <g class="ticks"><line x1="37" y1="70" x2="41" y2="70"/><line x1="38.5" y1="80" x2="41" y2="80"/><line x1="37" y1="90" x2="41" y2="90"/><line x1="38.5" y1="100" x2="41" y2="100"/></g>
+      ${SHAPE.cork}
+    </svg>`;
+  }
+  function flask(i, content, fresh) {
+    const cls = ['flask', content ? 'filled' : 'empty', fresh ? 'fresh' : ''].join(' ');
+    const name = content ? content[0].toUpperCase() + content.slice(1) : 'Unknown';
+    return `<div class="${cls}">${flaskSVG(content)}<div class="tag"><span class="n">No.${i + 1}</span><span class="nm">${name}</span><span class="f">${content ? LIQ[content] : '—'}</span></div></div>`;
+  }
+  function mount(slot) {
+    const node = document.getElementById('game-tpl').content.cloneNode(true);
+    node.querySelector('.rack').innerHTML = POURED.map((c, i) => flask(i, c, i === FRESH)).join('');
+    let g = '<span></span>' + [1,2,3,4,5].map(n => `<span class="hd">No.${n}</span>`).join('');
+    for (const l of ORDER) {
+      g += `<div class="lq"><b>${l[0].toUpperCase() + l.slice(1)}</b><i>${LIQ[l]}</i></div>`;
+      for (let f = 0; f < 5; f++) {
+        const on = POURED[f] === l;
+        const taken = !on && (POURED[f] !== null || POURED.includes(l));
+        g += `<button class="cell${on ? ' on' : ''}${taken ? ' taken' : ''}" aria-label="Pour ${l} into flask ${f + 1}"><span>${f + 1}</span></button>`;
+      }
+    }
+    node.querySelector('.grid').innerHTML = g;
+    slot.appendChild(node);
+  }
+  document.querySelectorAll('.slot').forEach(mount);
+
+  // Bande d'états
+  document.getElementById('states').innerHTML = `
+    <div class="state"><div class="game" style="background:none;padding:0;display:block;height:auto">${flask(0, null)}</div><em>Flacon vide</em></div>
+    <div class="state"><div class="game" style="background:none;padding:0;display:block;height:auto">${flask(1, 'wine')}</div><em>Versé</em></div>
+    <div class="state"><div class="game" style="background:none;padding:0;display:block;height:auto">${flask(3, 'honey', true)}</div><em>Dernier versement</em></div>
+    <div class="state"><div class="game" style="background:none;padding:0;display:block;height:auto;width:250px">
+        <button class="cap" disabled style="width:100%"><span>Cap the rack</span><span class="lv"><i class="f"></i><i class="f"></i><i class="f"></i><i></i><i></i></span><span>3/5</span></button>
+        <div style="height:10px"></div>
+        <button class="cap ready" style="width:100%"><span>Cap the rack</span><span class="lv"><i></i><i></i><i></i><i></i><i></i></span><span>5/5</span></button>
+      </div><em>Bouton · inactif / prêt</em></div>
+    <div class="state"><div style="display:grid;gap:10px">
+        <div class="toast ok"><b>Rack complete</b>Corked in 01:47 · streak 6.</div>
+        <div class="toast bad"><b>Toxic mix</b>One liquid landed in the wrong flask. Re-pour and try again.</div>
+      </div><em>Résultat · gagné / raté</em></div>
+    <div class="state"><div class="loading"><div>Stoking the lamps…<i></i></div></div><em>Chargement</em></div>`;
+
+  // 70 % ↔ 1:1
+  document.querySelectorAll('.scale-btn').forEach(b => b.addEventListener('click', () => {
+    const v = document.getElementById(b.dataset.target);
+    const full = v.style.getPropertyValue('--s') === '1';
+    v.style.setProperty('--s', full ? '.7' : '1');
+    b.textContent = full ? '1:1' : '70 %';
+  }));
+</script>
+</body>
+</html>
