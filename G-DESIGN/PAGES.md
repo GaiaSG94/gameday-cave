@@ -5,10 +5,10 @@
 
 | # | Page | Rôle | Contenu clé | Statut |
 |---|------|------|-------------|--------|
-| 1 | **Post** | Vue dans le fil (`splash.html`, inline) : donner envie d'ouvrir l'expérience du jour | En-tête du post, n° du banc du jour, râtelier de 5 flacons fermés, série du joueur, bouton d'entrée (« Descend » aujourd'hui) | **en revue (V2, `planches/v2/00-post.html`)** |
+| 1 | **Post** | Vue dans le fil (`splash.html`, inline) : donner envie d'ouvrir l'expérience du jour | En-tête du post, n° du banc du jour, râtelier de 5 flacons fermés, série du joueur, bouton d'entrée (« Descend » aujourd'hui) | **validée (V2, `planches/v2/00-post.html`)** |
 | 2 | **Jeu** | Écran principal (`game.html`, vue étendue). Une seule règle : « verse chaque liquide dans un flacon, chaque note du cahier doit tenir » | 5 flacons, 5 liquides (water, wine, oil, honey, poison), notes du cahier (indices), grille de versement liquide × flacon, chrono, série, bouton « Cap the rack » (n/5) | **validée (V2, `planches/v2/01-verre-souffle.html`)** — V1 écartée |
-| 3 | **Carte de fin** | Résultat + boucle quotidienne + accroche commentaire | Gagné (« Rack complete ») ou raté (« Toxic mix », on peut reverser), temps, série, invitation à commenter en un geste, prochain banc | **en revue (V2, `planches/v2/02-carte-de-fin.html`)** |
-| 4 | **Séries & classement** | Montrer la série et les scores de la communauté | Série perso, scores communautaires du jour | **en revue (V2, `planches/v2/03-series-classement.html`)** — données de démo, **voir question 4** |
+| 3 | **Carte de fin** | Résultat + boucle quotidienne + accroche commentaire | Gagné (« Rack complete ») ou raté (« Toxic mix », on peut reverser), temps, série, invitation à commenter en un geste, prochain banc | **validée (V2, `planches/v2/02-carte-de-fin.html`)** |
+| 4 | **Séries & classement** | Montrer la série et les scores de la communauté | Série perso, scores communautaires du jour | **validée (V2, `planches/v2/03-series-classement.html`)** — données de démo, **voir question 4** |
 
 États transverses (dessinés dans la bande « États » de chaque planche, pas des pages) : chargement, flacon vide / versé / dernier versement, bouton inactif / prêt, résultat gagné / raté.
 
