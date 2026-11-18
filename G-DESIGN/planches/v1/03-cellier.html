@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cave · V1 · 03 Cellier</title>
+<!--
+  Planche V1 — page « Jeu » — direction 03 Cellier.
+  Fichier autonome : aucune police, image ou script externe.
+  Données de démo réelles : generateCave('2026-12-14') (src/shared/puzzle.ts).
+-->
+<style id="board">
+  /* ---------- Planche (neutre, identique sur les 3 directions) ---------- */
+  :root { --board-bg:#d9d8d4; --board-ink:#1d1d1b; --board-muted:#62615c; --board-line:#bdbbb5; }
+  * { box-sizing:border-box; }
+  html,body { margin:0; }
+  body { background:var(--board-bg); color:var(--board-ink); font:14px/1.45 "Ubuntu Sans","Noto Sans","Helvetica Neue",Arial,sans-serif; min-width:1400px; }
+  .board-head { display:grid; grid-template-columns: 1.15fr 1fr 0.9fr; gap:40px; padding:36px 48px 28px; border-bottom:1px solid var(--board-line); }
+  .board-head h1 { margin:0 0 6px; font-size:28px; letter-spacing:-0.01em; }
+  .board-head .kicker { font:600 11px/1 "Ubuntu Sans Mono","Noto Sans Mono",monospace; letter-spacing:.14em; text-transform:uppercase; color:var(--board-muted); margin-bottom:10px; }
+  .board-head p { margin:0 0 6px; color:#3a3936; max-width:56ch; }
+  .board-head h2 { font:600 11px/1 "Ubuntu Sans Mono","Noto Sans Mono",monospace; letter-spacing:.14em; text-transform:uppercase; color:var(--board-muted); margin:0 0 12px; }
+  .chips { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+  .chip { border-radius:6px; overflow:hidden; border:1px solid rgba(0,0,0,.12); background:#fff; }
+  .chip i { display:block; height:42px; }
+  .chip span { display:block; padding:6px 8px; font:11px/1.3 "Ubuntu Sans Mono","Noto Sans Mono",monospace; }
+  .chip b { display:block; font:600 11px/1.3 "Ubuntu Sans","Noto Sans",sans-serif; }
+  .specimen { background:#fff; border:1px solid rgba(0,0,0,.12); border-radius:6px; padding:14px 16px; }
+  .frames { display:flex; gap:40px; align-items:flex-start; padding:28px 48px 8px; }
+  figure { margin:0; }
+  figcaption { font:600 11px/1 "Ubuntu Sans Mono","Noto Sans Mono",monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--board-muted); margin-bottom:10px; display:flex; gap:12px; align-items:center; }
+  .scale-btn { font:inherit; letter-spacing:inherit; text-transform:inherit; border:1px solid var(--board-line); background:#fff; border-radius:4px; padding:4px 8px; cursor:pointer; color:var(--board-ink); }
+  .viewport { --s:.7; overflow:hidden; border-radius:10px; box-shadow:0 1px 0 rgba(0,0,0,.08), 0 18px 40px -18px rgba(0,0,0,.45); background:#000; }
+  .v-desk { width:calc(1440px * var(--s)); height:calc(900px * var(--s)); }
+  .v-mob  { width:calc(390px * var(--s)); height:calc(844px * var(--s)); border-radius:calc(44px * var(--s)); }
+  .screen { transform:scale(var(--s)); transform-origin:0 0; position:relative; overflow:hidden; }
+  .notes { padding:20px 48px 8px; display:grid; grid-template-columns:repeat(3,1fr); gap:24px; color:#3a3936; }
+  .notes h3 { font:600 11px/1 "Ubuntu Sans Mono","Noto Sans Mono",monospace; letter-spacing:.14em; text-transform:uppercase; color:var(--board-muted); margin:0 0 8px; }
+  .notes ul { margin:0; padding-left:18px; }
+  .states { margin:20px 48px 48px; border-radius:10px; overflow:hidden; }
+  .states > h3 { font:600 11px/1 "Ubuntu Sans Mono","Noto Sans Mono",monospace; letter-spacing:.14em; text-transform:uppercase; color:var(--board-muted); margin:0 0 10px; }
+
+  /* ---------- Chrome du fil (neutre, générique, sans marque) ---------- */
+  .feed { position:absolute; inset:0; background:#eceef0; font-family:"Ubuntu Sans","Noto Sans",Arial,sans-serif; color:#1c1c1c; }
+  .feed .top { height:56px; background:#fff; border-bottom:1px solid #dfe1e3; display:flex; align-items:center; gap:16px; padding:0 20px; }
+  .feed .top .logo { width:32px; height:32px; border-radius:50%; background:#c9ccd0; }
+  .feed .top .search { flex:0 0 560px; margin:0 auto; height:38px; border-radius:20px; background:#eef0f2; }
+  .feed .top .me { width:32px; height:32px; border-radius:50%; background:#c9ccd0; }
+  .feed .rail { position:absolute; left:0; top:56px; bottom:0; width:260px; border-right:1px solid #dfe1e3; background:#fff; padding:20px; }
+  .feed .rail i { display:block; height:12px; border-radius:6px; background:#e3e5e8; margin:14px 0; }
+  .feed .col { position:absolute; left:340px; top:80px; width:740px; }
+  .card { background:#fff; border:1px solid #dfe1e3; border-radius:12px; padding:14px 16px; margin-bottom:16px; }
+  .post-h { display:flex; align-items:center; gap:8px; font-size:12px; color:#576f76; }
+  .post-h .av { width:24px; height:24px; border-radius:50%; background:#121417; }
+  .post-h b { color:#1c1c1c; }
+  .post-t { font-size:18px; font-weight:600; margin:8px 0 10px; color:#1c1c1c; }
+  .ghost { height:300px; border-radius:10px; background:#e7e9eb; }
+  .scrim { position:absolute; inset:0; background:rgba(10,12,14,.62); }
+  .modal { position:absolute; left:50%; top:46px; transform:translateX(-50%); width:1000px; height:808px; border-radius:16px; overflow:hidden; box-shadow:0 30px 80px rgba(0,0,0,.5); }
+  .modal .bar, .m-bar { height:44px; display:flex; align-items:center; justify-content:space-between; padding:0 14px; background:#fff; border-bottom:1px solid #dfe1e3; font:600 13px/1 "Ubuntu Sans","Noto Sans",Arial,sans-serif; color:#1c1c1c; }
+  .x { width:28px; height:28px; border-radius:50%; background:#eef0f2; display:grid; place-items:center; font-size:16px; color:#3b3b3b; }
+  .slot { container-type:size; }
+  .modal .slot { height:calc(100% - 44px); }
+  .phone { position:absolute; inset:0; background:#fff; }
+  .status { height:44px; display:flex; align-items:center; justify-content:space-between; padding:0 26px; font:600 14px/1 "Ubuntu Sans","Noto Sans",Arial,sans-serif; color:#1c1c1c; background:#fff; }
+  .status i { display:inline-block; width:18px; height:10px; border-radius:2px; background:#1c1c1c; margin-left:4px; }
+  .phone .slot { position:absolute; top:88px; left:0; right:0; bottom:0; }
+  .home-ind { position:absolute; bottom:8px; left:50%; transform:translateX(-50%); width:134px; height:5px; border-radius:3px; background:rgba(255,255,255,.55); z-index:3; }
+</style>
+
+<style id="direction">
+  /* ================== DIRECTION 03 — CELLIER ==================
+     « Cave » au sens de cellier : pénombre chaude, une lampe derrière l'étagère,
+     verre rendu en matière (reflets, transparence), étiquettes kraft ficelées.
+     Un seul accent : l'ambre de la lampe. */
+  .game {
+    --bg:#0f0c0a; --surface:#17120f; --raise:#201914; --line:#2d251e; --line-2:#433629;
+    --ink:#efe6d8; --muted:#a09380; --faint:#6a5e50;
+    --accent:#e8a74a; --accent-ink:#1a1006; --cork:#a87a4c; --kraft:#d9c4a0; --alert:#d5503f;
+    --font:"Inter","Helvetica Neue","Ubuntu Sans","Noto Sans",Arial,sans-serif;
+    --mono:"JetBrains Mono","IBM Plex Mono","Ubuntu Sans Mono","Noto Sans Mono",Menlo,monospace;
+    position:relative; height:100%; overflow:hidden;
+    background:var(--bg);
+    color:var(--ink); font:400 14px/1.4 var(--font);
+    display:grid; gap:10px; padding:12px 16px 26px;
+    grid-template-rows:auto auto auto auto 1fr auto;
+    grid-template-areas: "head" "rule" "rack" "ledger" "pour" "cap";
+  }
+  .g-head { grid-area:head; display:flex; align-items:center; justify-content:space-between; }
+  .brand { font:600 17px/1 var(--font); letter-spacing:.42em; text-transform:uppercase; }
+  .brand small { display:block; font:500 10px/1 var(--mono); letter-spacing:.14em; color:var(--muted); margin-top:7px; }
+  .stats { display:flex; gap:16px; font:500 12px/1 var(--mono); color:var(--muted); }
+  .stats .streak b { color:var(--accent); font-weight:600; }
+  .rule { grid-area:rule; margin:0; color:var(--muted); font-size:13px; }
+  .rule b { color:var(--ink); font-weight:600; }
+
+  /* Étagère éclairée par derrière */
+  .rack { grid-area:rack; position:relative; display:grid; grid-template-columns:repeat(5,1fr); padding:14px 4px 0; isolation:isolate; }
+  .rack::before { content:""; position:absolute; inset:-30px -16px 30px; z-index:-1;
+    background:radial-gradient(46% 62% at 50% 52%, rgba(232,167,74,.20), rgba(232,167,74,.05) 55%, transparent 75%); }
+  .rack::after { content:""; position:absolute; left:-16px; right:-16px; top:calc(14px + 94px); height:7px; z-index:-1;
+    background:linear-gradient(#3b2f24 0 1px, #261d16 1px 100%); box-shadow:0 10px 18px rgba(0,0,0,.6); }
+  .flask { display:flex; flex-direction:column; align-items:center; gap:0; position:relative; }
+  .flask svg { width:38px; height:96px; overflow:visible; }
+  .glass { fill:url(#g-glass); stroke:rgba(239,230,216,.42); stroke-width:1.2; }
+  .shine { stroke:rgba(255,246,230,.55); stroke-width:2; stroke-linecap:round; fill:none; }
+  .ticks { display:none; }
+  .cork { fill:url(#g-cork); }
+  .cork-line { stroke:rgba(0,0,0,.3); stroke-width:1; }
+  .level-mark { stroke:rgba(239,230,216,.25); stroke-dasharray:2 3; stroke-width:1; }
+  .liq { stroke:none; }
+  .men { fill:none; stroke:rgba(255,246,230,.75); stroke-width:1.3; stroke-linecap:round; }
+  .liq.water  { fill:rgba(239,230,216,.10); }
+  .liq.wine   { fill:#3a2620; }
+  .liq.oil    { fill:url(#p-oil); }
+  .liq.honey  { fill:url(#p-honey); }
+  .liq.poison { fill:url(#p-poison); }
+  .pat-line { stroke:#b8a68c; stroke-width:1; }
+  .pat-dot  { fill:#c9b597; }
+  .pat-bg   { fill:#2a221b; }
+  .flask.fresh .glass { stroke:var(--accent); }
+  .flask.fresh .men { stroke:var(--accent); }
+  .flask.fresh svg { filter:drop-shadow(0 0 10px rgba(232,167,74,.45)); }
+  /* étiquette kraft ficelée au col */
+  .tag { position:relative; text-align:center; min-width:58px; padding:4px 6px 5px; margin-top:12px; background:var(--kraft); color:#2a2017; border-radius:2px 2px 3px 3px; clip-path:polygon(10% 0,90% 0,100% 22%,100% 100%,0 100%,0 22%); }
+  .flask::after { content:""; position:absolute; left:50%; top:24px; width:1px; height:calc(100% - 46px); background:rgba(217,196,160,.35); transform:translateX(-50%) rotate(0deg); z-index:-1; }
+  .tag .n { font:600 9.5px/1 var(--mono); letter-spacing:.08em; color:#6b5840; }
+  .tag .nm { display:block; font:700 12px/1.15 var(--font); margin-top:3px; letter-spacing:.02em; }
+  .tag .f { display:block; font:400 9.5px/1.2 var(--mono); color:#6b5840; }
+  .flask.empty .tag { background:transparent; color:var(--faint); outline:1px dashed var(--line-2); outline-offset:-1px; }
+  .flask.empty .tag .n, .flask.empty .tag .f { color:var(--faint); }
+  .flask.fresh .tag { box-shadow:inset 0 -3px 0 var(--accent); }
+
+  .ledger { grid-area:ledger; }
+  .ledger h3, .pour h3 { margin:0 0 6px; font:600 10px/1 var(--mono); letter-spacing:.16em; text-transform:uppercase; color:var(--muted); display:flex; justify-content:space-between; }
+  .ledger ol { list-style:none; margin:0; padding:0; }
+  .ledger li { display:grid; grid-template-columns:22px 1fr; gap:6px; font-size:13px; line-height:1.35; padding:3px 0; }
+  .ledger li span { font:500 11px/1.6 var(--mono); color:var(--faint); }
+  .ledger b { font-weight:600; }
+
+  .pour { grid-area:pour; align-self:start; }
+  .grid { display:grid; grid-template-columns:92px repeat(5,1fr); gap:5px 4px; align-items:center; }
+  .grid .hd { font:500 10px/1 var(--mono); color:var(--muted); text-align:center; }
+  .grid .lq b { display:block; font:600 12.5px/1.15 var(--font); }
+  .grid .lq i { font:400 9.5px/1.2 var(--mono); color:var(--muted); font-style:normal; }
+  .cell { justify-self:center; width:32px; height:32px; border-radius:50%; border:1px solid var(--line-2); background:radial-gradient(circle at 35% 30%, #2a221b, #15110d); display:grid; place-items:center; font:500 10.5px/1 var(--mono); color:var(--faint); cursor:pointer; padding:0; }
+  .cell:hover, .cell.hover { border-color:var(--accent); color:var(--ink); }
+  .cell.on { background:radial-gradient(circle at 35% 30%, #f6c47a, #e8a74a 55%, #b9772a); border-color:#f3c27c; box-shadow:0 0 14px rgba(232,167,74,.45); }
+  .cell.on span { display:none; }
+  .cell.taken { opacity:.35; }
+
+  .cap { grid-area:cap; height:50px; border-radius:999px; border:1px solid var(--line-2); background:var(--surface); color:var(--muted); font:600 13px/1 var(--font); letter-spacing:.16em; text-transform:uppercase; display:flex; align-items:center; justify-content:center; gap:12px; cursor:not-allowed; }
+  .cap .lv { display:flex; gap:3px; }
+  .cap .lv i { width:6px; height:6px; border-radius:50%; background:var(--line-2); }
+  .cap .lv i.f { background:var(--accent); }
+  .cap.ready { background:linear-gradient(#f0b55e, #e8a74a); border-color:#f3c27c; color:var(--accent-ink); cursor:pointer; box-shadow:0 8px 24px -8px rgba(232,167,74,.6); }
+  .cap.ready .lv i { background:rgba(26,16,6,.75); }
+
+  @container (min-width: 760px) {
+    .game { padding:28px 40px 28px; gap:18px 48px; grid-template-columns:1.3fr 1fr;
+      grid-template-rows:auto auto auto 1fr auto;
+      grid-template-areas: "head head" "rule rule" "rack ledger" "pour ledger" "pour cap"; }
+    .brand { font-size:22px; }
+    .flask svg { width:62px; height:155px; }
+    .rack::after { top:calc(14px + 150px); }
+    .flask::after { top:30px; height:calc(100% - 56px); }
+    .ledger { border-left:1px solid var(--line-2); padding:4px 0 0 24px; align-self:start; }
+    .ledger li { font-size:15px; padding:9px 0; }
+    .cell { width:42px; height:42px; }
+    .grid { grid-template-columns:120px repeat(5,1fr); gap:8px 6px; }
+    .cap { height:56px; }
+  }
+
+  .states-row { display:grid; grid-template-columns:repeat(6,auto); gap:28px; align-items:end; padding:22px 28px; background:#0f0c0a; color:#efe6d8; border-radius:10px; }
+  .state { display:flex; flex-direction:column; gap:10px; align-items:center; }
+  .state > em { font:500 10px/1 "Ubuntu Sans Mono","Noto Sans Mono",monospace; letter-spacing:.1em; text-transform:uppercase; color:#a09380; font-style:normal; }
+  .toast { border-radius:14px; padding:12px 14px; font:13px/1.35 Inter,"Ubuntu Sans",sans-serif; width:240px; border:1px solid #2d251e; background:#17120f; }
+  .toast b { display:block; font-size:11px; letter-spacing:.16em; text-transform:uppercase; margin-bottom:4px; }
+  .toast.ok b { color:#e8a74a; }
+  .toast.bad { border-color:rgba(213,80,63,.55); } .toast.bad b { color:#d5503f; }
+  .loading { width:200px; height:90px; display:grid; place-items:center; font:500 11px/1 "Ubuntu Sans Mono",monospace; color:#a09380; letter-spacing:.1em; border-radius:12px; background:radial-gradient(60% 80% at 50% 50%, rgba(232,167,74,.14), transparent 70%); }
+  .loading i { display:block; width:8px; height:8px; border-radius:50%; background:#e8a74a; margin:10px auto 0; box-shadow:0 0 12px #e8a74a; }
+
+</style>
+</head>
+<body>
+
+<header class="board-head">
+  <div>
+    <div class="kicker">Cave · V1 · page « Jeu » · direction 03 / 03</div>
+    <h1>Cellier</h1>
+    <p>On prend « Cave » au mot : une étagère dans la pénombre, une lampe derrière, des flacons ronds dont on voit la matière du verre.</p>
+    <p>L'ambre de la lampe est le seul accent : il s'allume sur ce qu'on vient de verser et sur le bouton final.</p>
+    <p>Les étiquettes kraft sont ficelées au col : c'est là que le joueur « écrit » sa déduction.</p>
+  </div>
+  <div>
+    <h2>Palette</h2>
+    <div class="chips">
+      <div class="chip"><i style="background:#0f0c0a"></i><span><b>Pénombre</b>#0f0c0a</span></div>
+      <div class="chip"><i style="background:#e8a74a"></i><span><b>Lampe · accent</b>#e8a74a</span></div>
+      <div class="chip"><i style="background:#d9c4a0"></i><span><b>Kraft · matière</b>#d9c4a0</span></div>
+      <div class="chip"><i style="background:#a87a4c"></i><span><b>Liège · matière</b>#a87a4c</span></div>
+      <div class="chip"><i style="background:#d5503f"></i><span><b>Alerte · état</b>#d5503f</span></div>
+      <div class="chip"><i style="background:#efe6d8"></i><span><b>Encre</b>#efe6d8</span></div>
+    </div>
+  </div>
+  <div>
+    <h2>Typo</h2>
+    <div class="specimen" style="background:#0f0c0a;color:#efe6d8;border-color:#2d251e">
+      <div style="font:600 20px/1 Inter,'Ubuntu Sans',sans-serif;letter-spacing:.42em">CAVE</div>
+      <div style="font:600 13px/1.5 Inter,'Ubuntu Sans',sans-serif;margin-top:10px">Grotesque — capitales espacées pour les titres, bas de casse pour lire</div>
+      <div style="font:400 12px/1.5 'JetBrains Mono','Ubuntu Sans Mono',monospace;color:#a09380">Mono — H₂O · C₂H₅OH · As₂O₃ · 01:12</div>
+    </div>
+  </div>
+
+</header>
+
+<main class="frames">
+  <figure>
+    <figcaption>Desktop 1440 × 900 · vue étendue <button class="scale-btn" data-target="d1">1:1</button></figcaption>
+    <div class="viewport v-desk" id="d1">
+      <div class="screen" style="width:1440px;height:900px">
+        <div class="feed">
+          <div class="top"><div class="logo"></div><div class="search"></div><div class="me"></div></div>
+          <div class="rail"><i style="width:70%"></i><i style="width:55%"></i><i style="width:80%"></i><i style="width:40%"></i><i style="width:65%"></i></div>
+          <div class="col">
+            <div class="card"><div class="post-h"><span class="av"></span><b>r/CaveBench</b> · 3 h</div><div class="post-t">Bench 06 — five unlabeled flasks, one experiment</div><div class="ghost"></div></div>
+          </div>
+          <div class="scrim"></div>
+          <div class="modal"><div class="bar"><span>Cave</span><span class="x">×</span></div><div class="slot"></div></div>
+        </div>
+      </div>
+    </div>
+  </figure>
+  <figure>
+    <figcaption>Mobile 390 × 844 <button class="scale-btn" data-target="m1">1:1</button></figcaption>
+    <div class="viewport v-mob" id="m1">
+      <div class="screen" style="width:390px;height:844px">
+        <div class="phone">
+          <div class="status"><span>9:41</span><span><i></i><i></i><i style="width:24px"></i></span></div>
+          <div class="m-bar"><span class="x">×</span><span>Cave · r/CaveBench</span><span style="width:28px"></span></div>
+          <div class="slot"></div>
+          <div class="home-ind"></div>
+        </div>
+      </div>
+    </div>
+  </figure>
+</main>
+
+<section class="notes">
+  <div><h3>Ce qu'on voit</h3><ul><li>Même partie (14/12), même état : 3/5 versés ; le flacon 4 (miel) s'éclaire, sa pastille de grille est allumée.</li><li>Grille en pastilles rondes : plus « objet » que tableau, cible tactile de 32 px sur mobile.</li></ul></div>
+  <div><h3>Ce qui change</h3><ul><li>Flacon à fond rond (ballon) au lieu du flacon à réactif : silhouette plus reconnaissable de loin dans le fil.</li><li>Plus d'atmosphère, un peu moins de lisibilité « tableau » que 01.</li></ul></div>
+  <div><h3>Références appliquées</h3><ul><li>Igloo : la lumière structure l'écran (lampe derrière l'étagère), matière rendue.</li><li>Noon : un seul accent chaud, chiffres mono, compteurs en petites capitales.</li></ul></div>
+
+</section>
+
+<section class="states">
+  <h3>États · échelle 1:1</h3>
+  <div class="states-row" id="states"></div>
+</section>
+
+<!-- ===================== Composant jeu (cloné dans les deux cadres) ===================== -->
+<template id="game-tpl">
+  <div class="game">
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+      <defs>
+        <linearGradient id="g-glass" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="#efe6d8" stop-opacity=".10"/><stop offset=".35" stop-color="#efe6d8" stop-opacity=".02"/><stop offset=".8" stop-color="#efe6d8" stop-opacity=".05"/><stop offset="1" stop-color="#efe6d8" stop-opacity=".14"/></linearGradient>
+        <linearGradient id="g-cork" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#c49464"/><stop offset="1" stop-color="#8d6239"/></linearGradient>
+        <pattern id="p-oil" width="6" height="5" patternUnits="userSpaceOnUse"><rect class="pat-bg" width="6" height="5"/><line class="pat-line" x1="0" y1="2.5" x2="6" y2="2.5"/></pattern>
+        <pattern id="p-honey" width="6" height="6" patternUnits="userSpaceOnUse"><rect class="pat-bg" width="6" height="6"/><circle class="pat-dot" cx="3" cy="3" r="1.1"/></pattern>
+        <pattern id="p-poison" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect class="pat-bg" width="6" height="6"/><line class="pat-line" x1="0" y1="0" x2="0" y2="6"/><line class="pat-line" x1="0" y1="3" x2="6" y2="3"/></pattern>
+
+      </defs>
+    </svg>
+
+    <header class="g-head">
+      <div class="brand">Cave<small>Bench 06 · Mon 14 Dec</small></div>
+      <div class="stats"><span class="clock">01:12</span><span class="streak">Streak <b>5</b></span></div>
+    </header>
+    <p class="rule"><b>Pour each liquid into one flask.</b> Every ledger note must hold.</p>
+
+    <section class="rack" aria-label="Flask rack"></section>
+
+    <section class="ledger">
+      <h3><span>Ledger</span><span>4 notes</span></h3>
+      <ol>
+        <li><span>01</span><div>The <b>honey</b> sits immediately right of the <b>oil</b>.</div></li>
+        <li><span>02</span><div>The <b>poison</b> sits immediately right of the <b>honey</b>.</div></li>
+        <li><span>03</span><div>Flask 5 holds the <b>poison</b>.</div></li>
+        <li><span>04</span><div>The <b>water</b> sits immediately right of the <b>wine</b>.</div></li>
+      </ol>
+    </section>
+
+    <section class="pour">
+      <h3><span>Pour</span><span>tap a cell</span></h3>
+      <div class="grid"></div>
+    </section>
+
+    <button class="cap" disabled><span>Cap the rack</span><span class="lv"><i class="f"></i><i class="f"></i><i class="f"></i><i></i><i></i></span><span>3/5</span></button>
+  </div>
+</template>
+
+<script>
+  // Données de démo : generateCave('2026-12-14'), état en cours de partie.
+  const LIQ = { water:'H₂O', wine:'C₂H₅OH', oil:'C₁₈H₃₄O₂', honey:'C₆H₁₂O₆', poison:'As₂O₃' };
+  const ORDER = ['water','wine','oil','honey','poison'];
+  const POURED = [null, null, 'oil', 'honey', 'poison']; // flacons 1..5
+  const FRESH = 3; // index du dernier versement (flacon 4)
+
+  // Silhouette : flacon à réactif, col large, épaule courte (pas une bouteille).
+  // Silhouette : ballon à fond rond (col étroit, panse sphérique).
+  const SHAPE = {
+    body:'M18 20 V71 A22 22 0 1 0 30 71 V20 Z',
+    liquid:'M4 82 Q6 86 12 86 H36 Q42 86 44 82 A22.4 22.4 0 1 1 4 82 Z',
+    men:'M4.3 82 Q6 86 12 86 H36 Q42 86 43.7 82',
+    shine:'M9.5 90 A15 15 0 0 0 15 106', level:[6,86,42,86],
+    cork:'<rect class="cork" x="15.5" y="7" width="17" height="15" rx="2.5"/><line class="cork-line" x1="15.5" y1="12" x2="32.5" y2="12"/>'
+  };
+
+  function flaskSVG(content) {
+    return `<svg viewBox="0 0 48 120" aria-hidden="true">
+      <path class="glass" d="${SHAPE.body}"/>
+      ${content ? `<path class="liq ${content}" d="${SHAPE.liquid}"/><path class="men" d="${SHAPE.men}"/>` : `<line class="level-mark" x1="${SHAPE.level[0]}" y1="${SHAPE.level[1]}" x2="${SHAPE.level[2]}" y2="${SHAPE.level[3]}"/>`}
+      <path class="shine" d="${SHAPE.shine}"/>
+      <g class="ticks"><line x1="37" y1="70" x2="41" y2="70"/><line x1="38.5" y1="80" x2="41" y2="80"/><line x1="37" y1="90" x2="41" y2="90"/><line x1="38.5" y1="100" x2="41" y2="100"/></g>
+      ${SHAPE.cork}
+    </svg>`;
+  }
+  function flask(i, content, fresh) {
+    const cls = ['flask', content ? 'filled' : 'empty', fresh ? 'fresh' : ''].join(' ');
+    const name = content ? content[0].toUpperCase() + content.slice(1) : 'Unknown';
+    return `<div class="${cls}">${flaskSVG(content)}<div class="tag"><span class="n">No.${i + 1}</span><span class="nm">${name}</span><span class="f">${content ? LIQ[content] : '—'}</span></div></div>`;
+  }
+  function mount(slot) {
+    const node = document.getElementById('game-tpl').content.cloneNode(true);
+    node.querySelector('.rack').innerHTML = POURED.map((c, i) => flask(i, c, i === FRESH)).join('');
+    let g = '<span></span>' + [1,2,3,4,5].map(n => `<span class="hd">No.${n}</span>`).join('');
+    for (const l of ORDER) {
+      g += `<div class="lq"><b>${l[0].toUpperCase() + l.slice(1)}</b><i>${LIQ[l]}</i></div>`;
+      for (let f = 0; f < 5; f++) {
+        const on = POURED[f] === l;
+        const taken = !on && (POURED[f] !== null || POURED.includes(l));
+        g += `<button class="cell${on ? ' on' : ''}${taken ? ' taken' : ''}" aria-label="Pour ${l} into flask ${f + 1}"><span>${f + 1}</span></button>`;
+      }
+    }
+    node.querySelector('.grid').innerHTML = g;
+    slot.appendChild(node);
+  }
+  document.querySelectorAll('.slot').forEach(mount);
+
+  // Bande d'états
+  document.getElementById('states').innerHTML = `
+    <div class="state"><div class="game" style="background:none;padding:0;display:block;height:auto">${flask(0, null)}</div><em>Flacon vide</em></div>
+    <div class="state"><div class="game" style="background:none;padding:0;display:block;height:auto">${flask(1, 'wine')}</div><em>Versé</em></div>
+    <div class="state"><div class="game" style="background:none;padding:0;display:block;height:auto">${flask(3, 'honey', true)}</div><em>Dernier versement</em></div>
+    <div class="state"><div class="game" style="background:none;padding:0;display:block;height:auto;width:250px">
+        <button class="cap" disabled style="width:100%"><span>Cap the rack</span><span class="lv"><i class="f"></i><i class="f"></i><i class="f"></i><i></i><i></i></span><span>3/5</span></button>
+        <div style="height:10px"></div>
+        <button class="cap ready" style="width:100%"><span>Cap the rack</span><span class="lv"><i></i><i></i><i></i><i></i><i></i></span><span>5/5</span></button>
+      </div><em>Bouton · inactif / prêt</em></div>
+    <div class="state"><div style="display:grid;gap:10px">
+        <div class="toast ok"><b>Rack complete</b>Corked in 01:47 · streak 6.</div>
+        <div class="toast bad"><b>Toxic mix</b>One liquid landed in the wrong flask. Re-pour and try again.</div>
+      </div><em>Résultat · gagné / raté</em></div>
+    <div class="state"><div class="loading"><div>Stoking the lamps…<i></i></div></div><em>Chargement</em></div>`;
+
+  // 70 % ↔ 1:1
+  document.querySelectorAll('.scale-btn').forEach(b => b.addEventListener('click', () => {
+    const v = document.getElementById(b.dataset.target);
+    const full = v.style.getPropertyValue('--s') === '1';
+    v.style.setProperty('--s', full ? '.7' : '1');
+    b.textContent = full ? '1:1' : '70 %';
+  }));
+</script>
+</body>
+</html>
