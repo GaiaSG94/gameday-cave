@@ -3,9 +3,31 @@
 > Journal de design. Versions datées, jamais écrasées. Tenu par Claude (prompt design, `PROMPT-DESIGN.md`).
 > Livrables : `G-DESIGN/` (PAGES, REFS, STYLE, planches).
 
+## V2.1 — 2026-11-18 — déclinaison du style validé sur les 3 autres pages
+
+**Statut** : style V2 validé par Gaia sur la page Jeu (« Approved, roll out »). Les 3 nouvelles planches sont en revue. Le style n'est pas verrouillé (`/lock` seulement quand toutes les pages seront validées).
+
+### Livré
+- `G-DESIGN/STYLE.md` : palette, typo, grille, composants, mouvement, règles d'états.
+- `G-DESIGN/planches/v2/00-post.html` : vue inline dans le fil (desktop 708 × 420, mobile 390 × 400). Flacons fermés au liquide laiteux, « five flasks, no labels. », bouton « Descend ». États : déjà résolu, premier passage.
+- `G-DESIGN/planches/v2/02-carte-de-fin.html` : temps 01:47 en héros, série 6 avec la semaine, flacons étiquetés (la solution), chiffres du jour, commentaire prêt sans spoiler, « Comment my time ». États : toxic mix (reste sur le Jeu), commentaire posté, bouton après envoi.
+- `G-DESIGN/planches/v2/03-series-classement.html` : ma série (96 px) avec le calendrier de décembre, top 5 du banc + ma ligne, chiffres du jour, histogramme des temps (desktop). États : ma ligne, légende du calendrier, onglet « All benches ».
+- `_src/build.py` : la CSS et le JS de la page Jeu validée sont injectés dans les autres planches. Un seul endroit à corriger, aucune dérive.
+
+### Décisions
+- Flacon « fermé » (`sealed`, `#e9efe6`, étiquette « ? ») ajouté au composant partagé : la vue inline ne révèle jamais la solution.
+- La carte de fin ne montre que la réussite. Un raté n'est pas une fin, puisque le jeu actuel permet de reverser.
+- Histogramme des temps sur desktop seulement : sur mobile, la page doit tenir sans défiler.
+- Données communautaires (chimistes, % de réussite, médiane, classement, pseudos) = démo, signalées sur chaque planche (PAGES, questions 4, 7 et 8).
+
+### Changelog V2.1
+- Classement, mobile : l'histogramme s'affichait malgré `display:none` (spécificité CSS) → corrigé.
+- Classement, desktop : le calendrier avait 9 colonnes, parce que la classe `today` du 14/12 entrait en collision avec la zone de grille `today` → renommée `now`.
+- Vérifié par script : 4 planches, desktop + mobile + états, 0 débordement, 0 texte coupé, police Archivo chargée.
+
 ## V2 — 2026-11-18 — page « Jeu » dans le design LabKit / Chemistry Lab
 
-**Statut** : en attente de validation par Gaia. Remplace la V1 (les 3 directions V1 sont écartées par Gaia).
+**Statut** : validée par Gaia le 2026-11-18. Remplace la V1 (les 3 directions V1 sont écartées par Gaia).
 
 ### Demande
 « Reprendre le design de LabKit du Chemistry Lab, mais pas son contenu. »

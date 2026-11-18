@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cave · V2 · Post</title>
+<!--
+  Planche V2 — page « Post » (splash.html, vue inline dans le fil) — style V2 validé (LabKit / Chemistry Lab).
+  CSS et JS partagés injectés depuis 01-verre-souffle.src.html par build.py. Aucune requête réseau.
+-->
+<style>
+/*SHARED_CSS*/
+
+  /* ---------- Post : la vue inline dans le fil ---------- */
+  .feedp { position:absolute; inset:0; background:#eceef0; font-family:"Ubuntu Sans","Noto Sans",Arial,sans-serif; color:#1c1c1c; }
+  .feedp .top { height:56px; background:#fff; border-bottom:1px solid #dfe1e3; display:flex; align-items:center; gap:16px; padding:0 20px; }
+  .feedp .top .logo, .feedp .top .me { width:32px; height:32px; border-radius:50%; background:#c9ccd0; }
+  .feedp .top .search { flex:0 0 560px; margin:0 auto; height:38px; border-radius:20px; background:#eef0f2; }
+  .feedp .rail { position:absolute; left:0; top:56px; bottom:0; width:260px; border-right:1px solid #dfe1e3; background:#fff; padding:20px; }
+  .feedp .rail i { display:block; height:12px; border-radius:6px; background:#e3e5e8; margin:14px 0; }
+  .feedp .col { position:absolute; left:340px; top:76px; width:740px; }
+  .pcard { background:#fff; border:1px solid #dfe1e3; border-radius:12px; padding:12px 16px 10px; margin-bottom:14px; }
+  .pcard .acts { display:flex; gap:8px; margin-top:10px; }
+  .pcard .acts i { height:30px; border-radius:15px; background:#eef0f2; width:84px; }
+  .inline { position:relative; height:420px; border-radius:12px; overflow:hidden; }
+  .inline .slot { position:absolute; inset:0; }
+  .next .ghost-box { height:140px; }
+  .phone .appbar { height:48px; display:flex; align-items:center; gap:10px; padding:0 14px; border-bottom:1px solid #dfe1e3; }
+  .phone .appbar i { width:28px; height:28px; border-radius:50%; background:#c9ccd0; }
+  .phone .appbar b { flex:1; height:30px; border-radius:15px; background:#eef0f2; }
+  .phone .mfeed { position:absolute; top:92px; left:0; right:0; bottom:0; background:#eceef0; overflow:hidden; }
+  .phone .mpost { background:#fff; padding:10px 0 8px; margin-bottom:8px; }
+  .phone .mpost .post-h, .phone .mpost .post-t, .phone .mpost .acts { padding:0 14px; }
+  .phone .mpost .post-t { font:600 16px/1.3 "Ubuntu Sans","Noto Sans",Arial,sans-serif; margin:6px 0 8px; }
+  .phone .mpost .acts { display:flex; gap:8px; margin-top:8px; }
+  .phone .mpost .acts i { height:28px; border-radius:14px; background:#eef0f2; width:70px; }
+  .phone .inline { border-radius:0; height:400px; }
+
+  .game.splash { grid-template-columns:1fr; grid-template-rows:auto 1fr auto auto;
+    grid-template-areas:"head" "bench" "pitch" "cta"; padding:14px 16px 18px; gap:8px; }
+  .splash .g-head { grid-area:head; }
+  .splash .bench { grid-area:bench; align-self:end; max-width:360px; width:100%; justify-self:center; }
+  .splash .flask svg { width:40px; height:98px; }
+  .splash .pitch { grid-area:pitch; text-align:center; }
+  .splash .pitch h2 { margin:0; font:900 26px/1 var(--f); font-stretch:70%; letter-spacing:-.01em; }
+  .splash .pitch p { margin:6px 0 0; font:700 10px/1.4 var(--mono); letter-spacing:.08em; text-transform:uppercase; color:var(--ink-60); }
+  .splash .cta { grid-area:cta; display:flex; justify-content:center; }
+  .splash .go { height:46px; padding:0 24px 0 18px; font-size:15px; }
+  .splash .done { display:flex; align-items:center; gap:10px; }
+  .splash .done .pill .num { font-size:22px; }
+  @container (min-width: 600px) {
+    .game.splash { padding:18px 24px 22px; }
+    .splash .bench { max-width:440px; }
+    .splash .flask svg { width:48px; height:118px; }
+    .splash .pitch h2 { font-size:32px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="board-head">
+  <div>
+    <div class="label">Cave · V2 · page « Post » · vue inline dans le fil (splash.html)</div>
+    <h1>le <span>post</span> du jour</h1>
+    <p>Ce que le joueur voit en faisant défiler son fil, avant d'ouvrir le jeu. Le banc du jour, cinq flacons fermés au contenu laiteux (rien n'est révélé), la promesse en une ligne et un seul bouton.</p>
+    <p>Même style que la page « Jeu » validée : la CSS est injectée depuis la planche Jeu au build.</p>
+  </div>
+  <div>
+    <h2 class="label">Ce qui change par rapport au Jeu</h2>
+    <ul style="margin:0;padding-left:18px;color:#3a3646">
+      <li>Flacon « fermé » : liquide laiteux `#e9efe6`, étiquette « ? ».</li>
+      <li>Pas de panneau : le vert, la verrerie, une phrase, un bouton.</li>
+      <li>Le bouton garde le mot du jeu actuel : « Descend ».</li>
+    </ul>
+  </div>
+  <div>
+    <h2 class="label">Cadres</h2>
+    <p>Desktop : la carte du post dans le fil, zone inline de 708 × 420. Mobile : le post en pleine largeur, zone inline de 390 × 400.</p>
+  </div>
+</header>
+
+<main class="frames">
+  <figure>
+    <figcaption><span class="label">Desktop 1440 × 900 · fil</span><button class="scale-btn" data-target="d1">1:1</button></figcaption>
+    <div class="viewport v-desk" id="d1">
+      <div class="screen" style="width:1440px;height:900px">
+        <div class="feedp">
+          <div class="top"><div class="logo"></div><div class="search"></div><div class="me"></div></div>
+          <div class="rail"><i style="width:70%"></i><i style="width:55%"></i><i style="width:80%"></i><i style="width:40%"></i><i style="width:65%"></i></div>
+          <div class="col">
+            <div class="pcard">
+              <div class="post-h"><span class="av"></span><b>r/CaveBench</b> · 3 h</div>
+              <div class="post-t">Bench 06 — five unlabeled flasks, one experiment</div>
+              <div class="inline"><div class="slot" data-state="new"></div></div>
+              <div class="acts"><i></i><i></i><i></i></div>
+            </div>
+            <div class="pcard next"><div class="post-h"><span class="av" style="background:#c9ccd0"></span><b>r/another</b> · 5 h</div><div class="post-t" style="width:60%;height:14px;border-radius:7px;background:#e3e5e8"></div><div class="ghost-box"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </figure>
+  <figure>
+    <figcaption><span class="label">Mobile 390 × 844 · fil</span><button class="scale-btn" data-target="m1">1:1</button></figcaption>
+    <div class="viewport v-mob" id="m1">
+      <div class="screen" style="width:390px;height:844px">
+        <div class="phone">
+          <div class="status"><span>9:41</span><span><i></i><i></i><i style="width:24px"></i></span></div>
+          <div class="appbar"><i></i><b></b><i></i></div>
+          <div class="mfeed">
+            <div class="mpost">
+              <div class="post-h"><span class="av"></span><b>r/CaveBench</b> · 3 h</div>
+              <div class="post-t">Bench 06 — five unlabeled flasks, one experiment</div>
+              <div class="inline"><div class="slot" data-state="new"></div></div>
+              <div class="acts"><i></i><i></i><i></i></div>
+            </div>
+            <div class="mpost"><div class="post-h"><span class="av" style="background:#c9ccd0"></span><b>r/another</b> · 5 h</div><div style="height:180px;margin:8px 14px 0;border-radius:10px;background:#e7e9eb"></div></div>
+          </div>
+          <div class="home-ind"></div>
+        </div>
+      </div>
+    </div>
+  </figure>
+</main>
+
+<section class="notes">
+  <div><div class="label">Ce qu'on voit</div><ul><li>Joueur avec une série de 5, qui n'a pas encore joué aujourd'hui (banc 06, 14/12).</li><li>Les flacons sont fermés et identiques : la vue inline ne donne aucun indice sur la solution.</li></ul></div>
+  <div><div class="label">Lisible en 5 secondes</div><ul><li>Un titre de 3 mots (« five flasks, no labels »), une ligne de contexte, un bouton.</li><li>Le nombre de chimistes du jour est un chiffre communautaire : il demande une donnée que le serveur ne stocke pas encore (voir PAGES, question 4).</li></ul></div>
+  <div><div class="label">États (bande ci-dessous)</div><ul><li>Déjà résolu aujourd'hui : le temps du joueur et « See your card ».</li><li>Premier passage : pas de série, une pilule « new ».</li></ul></div>
+</section>
+
+<section class="states">
+  <div class="label">États · échelle 1:1 · vue inline 390 × 400</div>
+  <div class="states-row" id="states" style="grid-template-columns:repeat(2,auto);background:#d9d8d4"></div>
+</section>
+
+<script>
+/*SHARED_JS*/
+
+  function splash(state) {
+    const right = state === 'first'
+      ? `<span class="pill gx">new <span class="chip">01</span></span>`
+      : `<span class="pill gx">streak <span class="chip">${state === 'solved' ? 6 : 5}</span></span>`;
+    const cta = state === 'solved'
+      ? `<div class="done"><span class="pill gx">corked in <span class="num">01:47</span></span><button class="go"><i></i>See your card</button></div>`
+      : `<button class="go"><i></i>Descend</button>`;
+    const pitch = state === 'solved'
+      ? `<h2>bench 06 is corked.</h2><p>Next bench in 09:12:44</p>`
+      : `<h2>five flasks, no labels.</h2><p>4 notes in today's ledger · 1,284 chemists poured</p>`;
+    return `<div class="game splash">
+      <header class="g-head">
+        <div class="brand">
+          <svg viewBox="0 0 26 34" aria-hidden="true"><rect x="8" y="1" width="10" height="7" rx="2" fill="#0b2a17"/><path d="M9 8 V12 C9 14 3 15 3 19 V29 Q3 33 7 33 H19 Q23 33 23 29 V19 C23 15 17 14 17 12 V8" fill="rgba(255,255,255,.35)" stroke="#0b2a17" stroke-width="2" stroke-linejoin="round"/><path d="M3.5 22 Q13 24.5 22.5 22 V29 Q22.5 32.5 19 32.5 H7 Q3.5 32.5 3.5 29 Z" fill="#0b2a17"/></svg>
+          <div><b>cave</b><small>Bench 06 · Mon 14 Dec</small></div>
+        </div>
+        <div class="pills">${right}</div>
+      </header>
+      <section class="bench">${[0,1,2,3,4].map(i => flask(i, state === 'solved' ? ['wine','water','oil','honey','poison'][i] : 'sealed')).join('')}</section>
+      <div class="pitch">${pitch}</div>
+      <div class="cta">${cta}</div>
+    </div>`;
+  }
+  document.querySelectorAll('.slot').forEach(s => { s.innerHTML = splash(s.dataset.state); });
+  document.getElementById('states').innerHTML = ['solved', 'first'].map(st => `
+    <div class="state"><div class="slot" style="width:390px;height:400px;border-radius:12px;overflow:hidden">${splash(st)}</div>
+    <em>${st === 'solved' ? 'Déjà résolu aujourd’hui (solution visible, puisque jouée)' : 'Premier passage (pas de série)'}</em></div>`).join('');
+</script>
+</body>
+</html>

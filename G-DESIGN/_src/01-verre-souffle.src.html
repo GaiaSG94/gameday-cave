@@ -332,13 +332,17 @@
 
 <script>
   // Données de démo : generateCave('2026-12-14'), en cours de partie.
+  // <shared-liq>
   const LIQ = {
     water:{ f:'H₂O', c:'#a9dcf2' }, wine:{ f:'C₂H₅OH', c:'#b3264f' }, oil:{ f:'C₁₈H₃₄O₂', c:'#e3cf5a' },
-    honey:{ f:'C₆H₁₂O₆', c:'#f0a12e' }, poison:{ f:'As₂O₃', c:'#4a2d6b' }
+    honey:{ f:'C₆H₁₂O₆', c:'#f0a12e' }, poison:{ f:'As₂O₃', c:'#4a2d6b' },
+    sealed:{ f:'', c:'#e9efe6' } // flacon fermé, contenu inconnu (Post) : liquide laiteux, rien n'est révélé
   };
+  // </shared-liq>
   const ORDER = ['water','wine','oil','honey','poison'];
   const POURED = [null, null, 'oil', 'honey', 'poison'];
   const FRESH = 3;
+  // <shared-js>
   let uid = 0;
 
   // Flacon en verre soufflé, bouché de liège, posé sur le vert (pas de paillasse sombre).
@@ -367,8 +371,9 @@
   }
   function flask(i, content, fresh) {
     const cls = ['flask', content ? 'filled' : 'empty', fresh ? 'fresh' : ''].join(' ');
-    return `<div class="${cls}">${flaskSVG(content)}<span class="tagp gx"><span class="n">NO.${i + 1}</span><span class="nm">${content || 'unknown'}</span></span></div>`;
+    return `<div class="${cls}">${flaskSVG(content)}<span class="tagp gx"><span class="n">NO.${i + 1}</span><span class="nm">${content === 'sealed' ? '?' : (content || 'unknown')}</span></span></div>`;
   }
+  // </shared-js>
   function mount(slot) {
     const node = document.getElementById('game-tpl').content.cloneNode(true);
     node.querySelector('.bench').innerHTML = POURED.map((c, i) => flask(i, c, i === FRESH)).join('');
@@ -397,12 +402,14 @@
       <div style="height:10px"></div><div class="res gx"><span class="chipx" style="background:#b91c1c">toxic mix</span><p>One liquid landed in the wrong flask. Re-pour and try again.</p></div>`)}<em>Résultat · gagné / raté</em></div>
     <div class="state">${wrap(`<div class="loading gx"><div>Stoking the lamps…<div class="bub"><i></i><i></i><i></i></div></div></div>`)}<em>Chargement</em></div>`;
 
+  // <shared-scale>
   document.querySelectorAll('.scale-btn').forEach(b => b.addEventListener('click', () => {
     const v = document.getElementById(b.dataset.target);
     const full = v.style.getPropertyValue('--s') === '1';
     v.style.setProperty('--s', full ? '.7' : '1');
     b.textContent = full ? '1:1' : '70 %';
   }));
+  // </shared-scale>
 </script>
 </body>
 </html>
