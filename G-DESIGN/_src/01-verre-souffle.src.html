@@ -1,0 +1,408 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cave · V2 · Verre soufflé</title>
+<!--
+  Planche V2 — page « Jeu » — design system du Chemistry Lab de LabKit (C4 « verre soufflé »),
+  appliqué au contenu de Cave. Rien du contenu LabKit n'est repris (ni fantôme, ni instruments,
+  ni lois, ni burette, ni « chemistry lab »).
+  Source : G-DESIGN/_src/01-verre-souffle.src.html → build.py (inline la police Archivo, OFL).
+  Fichier autonome : aucune requête réseau.
+  Données de démo réelles : generateCave('2026-12-14') (src/shared/puzzle.ts).
+-->
+<style>
+  @font-face { font-family:"Archivo"; src:url(data:font/woff2;base64,/*ARCHIVO_B64*/) format("woff2"); font-weight:100 900; font-stretch:62% 125%; font-display:block; }
+</style>
+<style id="board">
+  :root { --board-bg:#f3f2f7; --board-ink:#17141f; --board-muted:#5f5b70; --board-line:#dcd9e6; --f:"Archivo","Ubuntu Sans","Arial Narrow",system-ui,sans-serif; --mono:"JetBrains Mono","Ubuntu Sans Mono","Noto Sans Mono",Menlo,Consolas,monospace; }
+  * { box-sizing:border-box; }
+  html,body { margin:0; }
+  body { background:var(--board-bg); color:var(--board-ink); font:15px/1.5 var(--f); min-width:1400px; }
+  .label { font:600 11px/1.4 var(--mono); letter-spacing:.08em; text-transform:uppercase; color:var(--board-muted); }
+  .board-head { display:grid; grid-template-columns:1.2fr 1fr .9fr; gap:40px; padding:40px 48px 28px; border-bottom:2px solid var(--board-ink); }
+  .board-head h1 { font:900 56px/1 var(--f); font-stretch:72%; margin:10px 0 12px; letter-spacing:-.01em; }
+  .board-head h1 span { color:#2f8f3a; }
+  .board-head p { margin:0 0 6px; color:var(--board-muted); max-width:62ch; }
+  .board-head h2 { margin:0 0 12px; }
+  .chips { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+  .chip { border-radius:10px; overflow:hidden; border:1px solid var(--board-line); background:#fff; }
+  .chip i { display:block; height:40px; }
+  .chip span { display:block; padding:6px 8px; font:11px/1.3 var(--mono); color:var(--board-muted); }
+  .chip b { display:block; font:700 12px/1.3 var(--f); color:var(--board-ink); }
+  .liqs { display:flex; gap:6px; margin-top:10px; }
+  .liqs span { flex:1; font:600 10.5px/1.2 var(--mono); color:var(--board-muted); text-align:center; }
+  .liqs span i { display:block; height:22px; border-radius:6px; margin-bottom:4px; box-shadow:inset 0 -3px 5px rgba(0,0,0,.18); }
+  .specimen { background:#6cc95a; color:#0b2a17; border-radius:12px; padding:16px 18px; }
+  .frames { display:flex; gap:40px; align-items:flex-start; padding:28px 48px 8px; }
+  figure { margin:0; }
+  figcaption { margin-bottom:10px; display:flex; gap:12px; align-items:center; }
+  .scale-btn { font:600 11px/1 var(--mono); letter-spacing:.08em; border:1px solid var(--board-line); background:#fff; border-radius:999px; padding:5px 10px; cursor:pointer; color:var(--board-ink); }
+  .viewport { --s:.7; overflow:hidden; border-radius:12px; border:1px solid var(--board-line); box-shadow:0 14px 36px -22px rgba(20,15,40,.45); background:#000; }
+  .v-desk { width:calc(1440px * var(--s)); height:calc(900px * var(--s)); }
+  .v-mob  { width:calc(390px * var(--s)); height:calc(844px * var(--s)); border-radius:calc(44px * var(--s)); }
+  .screen { transform:scale(var(--s)); transform-origin:0 0; position:relative; overflow:hidden; }
+  .notes { padding:22px 48px 8px; display:grid; grid-template-columns:repeat(3,1fr); gap:26px; }
+  .notes ul { margin:6px 0 0; padding-left:18px; display:grid; gap:3px; color:#3a3646; }
+  .states { margin:22px 48px 56px; }
+  .states > .label { margin-bottom:10px; }
+
+  /* Chrome du fil : neutre, générique, sans marque */
+  .feed { position:absolute; inset:0; background:#eceef0; font-family:"Ubuntu Sans","Noto Sans",Arial,sans-serif; color:#1c1c1c; }
+  .feed .top { height:56px; background:#fff; border-bottom:1px solid #dfe1e3; display:flex; align-items:center; gap:16px; padding:0 20px; }
+  .feed .top .logo, .feed .top .me { width:32px; height:32px; border-radius:50%; background:#c9ccd0; }
+  .feed .top .search { flex:0 0 560px; margin:0 auto; height:38px; border-radius:20px; background:#eef0f2; }
+  .feed .rail { position:absolute; left:0; top:56px; bottom:0; width:260px; border-right:1px solid #dfe1e3; background:#fff; padding:20px; }
+  .feed .rail i { display:block; height:12px; border-radius:6px; background:#e3e5e8; margin:14px 0; }
+  .feed .col { position:absolute; left:340px; top:80px; width:740px; }
+  .card { background:#fff; border:1px solid #dfe1e3; border-radius:12px; padding:14px 16px; }
+  .post-h { display:flex; align-items:center; gap:8px; font-size:12px; color:#576f76; }
+  .post-h .av { width:24px; height:24px; border-radius:50%; background:#6cc95a; }
+  .post-h b { color:#1c1c1c; }
+  .post-t { font-size:18px; font-weight:600; margin:8px 0 10px; }
+  .ghost-box { height:300px; border-radius:10px; background:#e7e9eb; }
+  .scrim { position:absolute; inset:0; background:rgba(10,12,14,.6); }
+  .modal { position:absolute; left:50%; top:46px; transform:translateX(-50%); width:1000px; height:808px; border-radius:16px; overflow:hidden; box-shadow:0 30px 80px rgba(0,0,0,.5); }
+  .bar-h, .m-bar { height:44px; display:flex; align-items:center; justify-content:space-between; padding:0 14px; background:#fff; border-bottom:1px solid #dfe1e3; font:600 13px/1 "Ubuntu Sans","Noto Sans",Arial,sans-serif; color:#1c1c1c; }
+  .x { width:28px; height:28px; border-radius:50%; background:#eef0f2; display:grid; place-items:center; font-size:16px; color:#3b3b3b; }
+  .slot { container-type:size; }
+  .modal .slot { height:calc(100% - 44px); }
+  .phone { position:absolute; inset:0; background:#fff; }
+  .status { height:44px; display:flex; align-items:center; justify-content:space-between; padding:0 26px; font:600 14px/1 "Ubuntu Sans","Noto Sans",Arial,sans-serif; color:#1c1c1c; }
+  .status i { display:inline-block; width:18px; height:10px; border-radius:2px; background:#1c1c1c; margin-left:4px; }
+  .phone .slot { position:absolute; top:88px; left:0; right:0; bottom:0; }
+  .home-ind { position:absolute; bottom:8px; left:50%; transform:translateX(-50%); width:134px; height:5px; border-radius:3px; background:rgba(11,42,23,.45); z-index:3; }
+</style>
+
+<style id="game">
+  /* =============== Cave dans le design system LabKit / Chemistry Lab (C4 « verre soufflé ») ===============
+     Repris : page en aplat vert #6cc95a, encre #0b2a17, panneaux en verre dépoli (blanc 38 %, flou 16 px,
+     bord blanc, rayon 22), pilules, Archivo condensé 900 en bas de casse pour la marque et les chiffres,
+     mono en capitales pour les légendes, bouton principal encre avec point #ff5a3d, étiquettes à trait + point,
+     verrerie « soufflée » posée directement sur le vert, liquides colorés par la substance.
+     Pas repris : fantôme, « chemistry lab », onglets Lab/Laws/Knobs/Notebook, instruments, lois, burette, pH. */
+  .game {
+    --page:#6cc95a; --ink:#0b2a17; --ink-60:rgba(11,42,23,.6); --ink-15:rgba(11,42,23,.15);
+    --live:#ff5a3d; --ok:#16a34a; --bad:#b91c1c;
+    --water:#a9dcf2; --wine:#b3264f; --oil:#e3cf5a; --honey:#f0a12e; --poison:#4a2d6b;
+    --f:"Archivo","Ubuntu Sans","Arial Narrow",system-ui,sans-serif;
+    --mono:"JetBrains Mono","Ubuntu Sans Mono","Noto Sans Mono",Menlo,Consolas,monospace;
+    position:relative; height:100%; overflow:hidden; background:var(--page); color:var(--ink);
+    font:13px/1.35 var(--f); -webkit-font-smoothing:antialiased;
+    display:grid; gap:10px; padding:12px 14px 16px;
+    grid-template-columns:1fr;
+    grid-template-rows:auto auto auto 1fr auto;
+    grid-template-areas:"head" "bench" "ledger" "liq" "bar";
+  }
+  .game * { box-sizing:border-box; }
+  .gx { background:rgba(255,255,255,.38); -webkit-backdrop-filter:blur(16px) saturate(1.3); backdrop-filter:blur(16px) saturate(1.3); border:1px solid rgba(255,255,255,.62); box-shadow:0 20px 40px -24px rgba(5,45,20,.6), inset 0 1px 0 rgba(255,255,255,.75); border-radius:22px; }
+  .cap-t { font:700 10.5px/1 var(--mono); letter-spacing:.1em; text-transform:uppercase; color:var(--ink-60); display:flex; justify-content:space-between; align-items:baseline; gap:8px; }
+  .cap-t small { font-weight:600; letter-spacing:0; text-transform:none; opacity:.85; }
+  .num { font-family:var(--f); font-stretch:66%; font-weight:900; letter-spacing:-.02em; font-variant-numeric:tabular-nums; line-height:.9; white-space:nowrap; }
+
+  /* En-tête : marque + pilules */
+  .g-head { grid-area:head; display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .brand { display:flex; align-items:center; gap:8px; }
+  .brand svg { width:26px; height:34px; flex:none; }
+  .brand b { font:900 30px/1 var(--f); font-stretch:70%; letter-spacing:-.01em; }
+  .brand small { display:block; font:700 9.5px/1 var(--mono); letter-spacing:.1em; text-transform:uppercase; color:var(--ink-60); margin-top:3px; }
+  .pills { display:flex; gap:6px; }
+  .pill { height:34px; border-radius:999px; padding:0 12px; display:flex; align-items:center; gap:6px; font:700 12.5px/1 var(--f); white-space:nowrap; }
+  .pill .num { font-size:20px; }
+  .pill .chip { font:700 10.5px/1 var(--f); background:var(--ink); color:#fff; border-radius:999px; padding:4px 8px; }
+  .pill.time .mono { font:700 12.5px/1 var(--mono); }
+
+  /* Paillasse : la verrerie posée sur le vert */
+  .bench { grid-area:bench; display:grid; grid-template-columns:repeat(5,1fr); align-items:end; position:relative; padding-top:4px; }
+  .flask { display:flex; flex-direction:column; align-items:center; gap:6px; }
+  .flask svg { width:46px; height:112px; overflow:visible; display:block; }
+  .tagp { display:flex; flex-direction:column; align-items:center; border-radius:999px; padding:4px 10px 5px; min-width:58px; }
+  .tagp .n { font:700 9px/1 var(--mono); letter-spacing:.08em; color:var(--ink-60); }
+  .tagp .nm { font:700 12px/1.15 var(--f); white-space:nowrap; }
+  .flask.empty .tagp { background:rgba(255,255,255,.18); border:1px dashed rgba(11,42,23,.3); box-shadow:none; }
+  .flask.empty .tagp .nm { color:var(--ink-60); font-weight:600; }
+  .flask.fresh .tagp { background:var(--ink); border-color:var(--ink); }
+  .flask.fresh .tagp .n { color:rgba(255,255,255,.65); }
+  .flask.fresh .tagp .nm { color:#fff; }
+
+  /* Cahier d'indices */
+  .ledger { grid-area:ledger; padding:12px 12px 12px; display:flex; flex-direction:column; gap:7px; }
+  .ledger ol { list-style:none; margin:0; padding:0; display:grid; gap:5px; }
+  .ledger li { display:flex; gap:8px; align-items:flex-start; background:rgba(255,255,255,.55); border-radius:12px; padding:6px 10px; font-weight:600; font-size:12.5px; line-height:1.3; }
+  .ledger li .t { font:700 10.5px/1.6 var(--mono); color:var(--ink-60); flex:none; }
+  .ledger li .d { display:inline-block; width:9px; height:9px; border-radius:50%; background:var(--c); box-shadow:inset 0 -2px 3px rgba(0,0,0,.25); margin:0 2px 0 1px; vertical-align:-0.5px; }
+
+  /* Liquides : une ligne par substance, les 5 flacons en carrés (style .ch-sub .sq) */
+  .liq { grid-area:liq; padding:12px 12px 10px; display:flex; flex-direction:column; gap:4px; align-self:start; }
+  .sub { display:grid; grid-template-columns:12px minmax(0,1fr) repeat(5,32px); align-items:center; gap:6px; min-height:34px; }
+  .sub .dot { width:12px; height:12px; border-radius:50%; background:var(--c); box-shadow:inset 0 -2px 3px rgba(0,0,0,.25), 0 0 0 2px rgba(255,255,255,.65); }
+  .sub .nm { font-weight:700; font-size:13px; line-height:1.1; min-width:0; }
+  .sub .nm small { display:block; font:600 9.5px/1.2 var(--mono); color:var(--ink-60); }
+  .sq { width:32px; height:30px; border-radius:9px; display:grid; place-items:center; font:700 13px/1 var(--f); border:1.5px solid rgba(11,42,23,.3); background:transparent; color:var(--ink); cursor:pointer; padding:0; }
+  .sq:hover, .sq.hover { background:rgba(255,255,255,.65); }
+  .sq.on { background:var(--ink); color:#fff; border-color:var(--ink); }
+  .sq.taken { opacity:.3; }
+  .heads { display:grid; grid-template-columns:12px minmax(0,1fr) repeat(5,32px); gap:6px; }
+  .heads span { font:700 9px/1 var(--mono); color:var(--ink-60); text-align:center; letter-spacing:.06em; }
+
+  /* Barre du bas (style .ch-bar) */
+  .bar { grid-area:bar; height:58px; padding:8px; display:flex; align-items:center; gap:8px; border-radius:999px; }
+  .stat { flex:1; min-width:0; display:flex; align-items:center; gap:8px; padding-left:8px; font-weight:600; font-size:12.5px; }
+  .stat .dots { display:flex; flex:none; }
+  .stat .dots b { width:14px; height:14px; border-radius:50%; background:var(--c); box-shadow:inset 0 -2px 3px rgba(0,0,0,.2), 0 0 0 2px rgba(255,255,255,.65); }
+  .stat .dots b + b { margin-left:-4px; }
+  .stat span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .go { height:42px; border-radius:999px; padding:0 16px 0 13px; display:flex; align-items:center; gap:7px; font:700 13.5px/1 var(--f); white-space:nowrap; background:var(--ink); color:#fff; border:0; flex:none; cursor:pointer; }
+  .go i { width:8px; height:8px; border-radius:50%; background:var(--live); }
+  .go .k { font:700 11px/1 var(--mono); opacity:.7; }
+  .go:disabled { background:rgba(11,42,23,.18); color:var(--ink-60); cursor:not-allowed; }
+  .go:disabled i { background:rgba(11,42,23,.35); }
+
+  /* Cartes de mesure (desktop) */
+  .meas { display:none; }
+
+  /* ---------- Desktop : vue étendue large, trois colonnes qui ne se chevauchent jamais ---------- */
+  @container (min-width: 760px) {
+    .game { padding:16px 24px 20px; gap:14px 18px;
+      grid-template-columns:300px minmax(0,1fr) 236px;
+      grid-template-rows:auto minmax(0,1fr) auto;
+      grid-template-areas:"head head head" "liq bench side" "liq bar side"; }
+    .brand svg { width:32px; height:42px; }
+    .brand b { font-size:34px; }
+    .pill { height:46px; padding:0 18px; font-size:13.5px; }
+    .bench { align-self:center; padding:0; gap:4px; }
+    .flask svg { width:62px; height:152px; }
+    .flask { gap:10px; }
+    .tagp { padding:5px 12px 6px; }
+    .tagp .nm { font-size:13px; }
+    .side { grid-area:side; display:flex; flex-direction:column; gap:12px; min-height:0; }
+    .meas { display:flex; flex-direction:column; gap:7px; padding:14px 16px; }
+    .meas .big { font-size:62px; }
+    .meas .mid { font-size:40px; }
+    .vb { height:10px; border-radius:5px; background:rgba(11,42,23,.12); overflow:hidden; margin-top:2px; }
+    .vb i { display:block; height:100%; width:60%; background:var(--ink); border-radius:5px; }
+    .ledger { grid-area:auto; flex:1; min-height:0; }
+    .ledger li { font-size:13px; padding:8px 10px; }
+    .liq { align-self:stretch; padding:16px 14px; gap:6px; }
+    .sub { min-height:52px; gap:5px; grid-template-columns:12px minmax(0,1fr) repeat(5,32px); }
+    .heads { gap:5px; grid-template-columns:12px minmax(0,1fr) repeat(5,32px); }
+    .sq { width:32px; height:34px; }
+    .sub .nm { font-size:14px; }
+    .bar { justify-self:center; width:100%; max-width:520px; }
+  }
+
+  /* ---------- Bande d'états ---------- */
+  .states-row { display:grid; grid-template-columns:repeat(6,auto); gap:28px; align-items:end; justify-content:start; padding:24px 28px; background:#6cc95a; color:#0b2a17; border-radius:12px; font-family:var(--f); }
+  .state { display:flex; flex-direction:column; gap:10px; align-items:center; }
+  .state > em { font:700 10px/1 var(--mono); letter-spacing:.1em; text-transform:uppercase; color:rgba(11,42,23,.6); font-style:normal; }
+  .res { width:250px; padding:14px 16px; display:flex; flex-direction:column; gap:6px; }
+  .res .chipx { align-self:flex-start; font:700 11px/1 var(--f); color:#fff; border-radius:999px; padding:4px 9px; }
+  .res p { margin:0; font-weight:600; font-size:13px; }
+  .res .num { font-size:44px; }
+  .loading { width:210px; height:110px; display:grid; place-items:center; text-align:center; font:700 10.5px/1.4 var(--mono); letter-spacing:.1em; text-transform:uppercase; color:rgba(11,42,23,.6); }
+  .loading .bub { display:flex; gap:5px; justify-content:center; margin-top:10px; }
+  .loading .bub i { width:8px; height:8px; border-radius:50%; background:rgba(255,255,255,.8); box-shadow:0 0 0 1px rgba(11,42,23,.15); }
+  .loading .bub i:nth-child(2) { transform:translateY(-6px); } .loading .bub i:nth-child(3) { transform:translateY(-12px); }
+</style>
+</head>
+<body>
+
+<header class="board-head">
+  <div>
+    <div class="label">Cave · V2 · page « Jeu » · design system LabKit — Chemistry Lab</div>
+    <h1>cave, en <span>verre soufflé</span></h1>
+    <p>Le design du Chemistry Lab de LabKit (piste C4) appliqué à Cave : aplat vert, panneaux en verre dépoli, encre vert profond, Archivo condensé, verrerie posée directement sur le fond.</p>
+    <p>Le contenu reste celui de Cave : cinq flacons bouchés, cinq liquides, le cahier d'indices du jour, une grille pour verser. Pas de fantôme, ni d'instruments, de lois ou de burette.</p>
+  </div>
+  <div>
+    <h2 class="label">Palette — reprise du Chemistry Lab</h2>
+    <div class="chips">
+      <div class="chip"><i style="background:#6cc95a"></i><span><b>Page</b>#6cc95a</span></div>
+      <div class="chip"><i style="background:#0b2a17"></i><span><b>Encre</b>#0b2a17</span></div>
+      <div class="chip"><i style="background:#ff5a3d"></i><span><b>Point d'action</b>#ff5a3d</span></div>
+      <div class="chip"><i style="background:rgba(255,255,255,.38);background-color:#a7dc9c"></i><span><b>Verre dépoli</b>blanc 38 % + flou</span></div>
+      <div class="chip"><i style="background:#16a34a"></i><span><b>État · réussi</b>#16a34a</span></div>
+      <div class="chip"><i style="background:#b91c1c"></i><span><b>État · raté</b>#b91c1c</span></div>
+    </div>
+    <div class="liqs">
+      <span><i style="background:#a9dcf2"></i>water</span><span><i style="background:#b3264f"></i>wine</span><span><i style="background:#e3cf5a"></i>oil</span><span><i style="background:#f0a12e"></i>honey</span><span><i style="background:#4a2d6b"></i>poison</span>
+    </div>
+  </div>
+  <div>
+    <h2 class="label">Typo</h2>
+    <div class="specimen">
+      <div style="font:900 40px/1 Archivo;font-stretch:70%;letter-spacing:-.01em">cave</div>
+      <div style="font:900 52px/.9 Archivo;font-stretch:66%;letter-spacing:-.02em;margin-top:8px">01:12</div>
+      <div style="font:600 13px/1.5 Archivo;margin-top:8px">Archivo — texte, étiquettes, boutons</div>
+      <div style="font:700 10.5px/1.5 'JetBrains Mono','Ubuntu Sans Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:rgba(11,42,23,.6)">Mono — légendes · H₂O · As₂O₃</div>
+    </div>
+  </div>
+</header>
+
+<main class="frames">
+  <figure>
+    <figcaption><span class="label">Desktop 1440 × 900 · vue étendue</span><button class="scale-btn" data-target="d1">1:1</button></figcaption>
+    <div class="viewport v-desk" id="d1">
+      <div class="screen" style="width:1440px;height:900px">
+        <div class="feed">
+          <div class="top"><div class="logo"></div><div class="search"></div><div class="me"></div></div>
+          <div class="rail"><i style="width:70%"></i><i style="width:55%"></i><i style="width:80%"></i><i style="width:40%"></i><i style="width:65%"></i></div>
+          <div class="col"><div class="card"><div class="post-h"><span class="av"></span><b>r/CaveBench</b> · 3 h</div><div class="post-t">Bench 06 — five unlabeled flasks, one experiment</div><div class="ghost-box"></div></div></div>
+          <div class="scrim"></div>
+          <div class="modal"><div class="bar-h"><span>Cave</span><span class="x">×</span></div><div class="slot"></div></div>
+        </div>
+      </div>
+    </div>
+  </figure>
+  <figure>
+    <figcaption><span class="label">Mobile 390 × 844</span><button class="scale-btn" data-target="m1">1:1</button></figcaption>
+    <div class="viewport v-mob" id="m1">
+      <div class="screen" style="width:390px;height:844px">
+        <div class="phone">
+          <div class="status"><span>9:41</span><span><i></i><i></i><i style="width:24px"></i></span></div>
+          <div class="m-bar"><span class="x">×</span><span>Cave · r/CaveBench</span><span style="width:28px"></span></div>
+          <div class="slot"></div>
+          <div class="home-ind"></div>
+        </div>
+      </div>
+    </div>
+  </figure>
+</main>
+
+<section class="notes">
+  <div><div class="label">Ce qu'on voit</div><ul><li>Partie réelle du 14/12 (seed du jour), 3 flacons sur 5 versés. Le miel vient d'être versé dans le flacon 4 (étiquette à l'encre).</li><li>Bouton « Cap the rack » inactif tant que les 5 ne sont pas versés.</li></ul></div>
+  <div><div class="label">Repris de LabKit</div><ul><li>Desktop : trois colonnes qui ne se chevauchent pas (liquides | paillasse | mesures et cahier), barre en pilule en bas, comme le Chemistry Lab.</li><li>Les liquides en lignes « point de couleur + nom + carrés », comme les substances ; le temps en gros chiffres condensés, comme la température.</li></ul></div>
+  <div><div class="label">Adapté au mobile</div><ul><li>Le Chemistry Lab ne tient pas en 390 px (les panneaux se chevauchent). Ici, tout s'empile en une colonne qui tient sans défiler : vérifié par script.</li><li>Les étiquettes passent sous les flacons au lieu de traits de rappel.</li></ul></div>
+</section>
+
+<section class="states">
+  <div class="label">États · échelle 1:1</div>
+  <div class="states-row" id="states"></div>
+</section>
+
+<template id="game-tpl">
+  <div class="game">
+    <header class="g-head">
+      <div class="brand">
+        <svg viewBox="0 0 26 34" aria-hidden="true"><rect x="8" y="1" width="10" height="7" rx="2" fill="#0b2a17"/><path d="M9 8 V12 C9 14 3 15 3 19 V29 Q3 33 7 33 H19 Q23 33 23 29 V19 C23 15 17 14 17 12 V8" fill="rgba(255,255,255,.35)" stroke="#0b2a17" stroke-width="2" stroke-linejoin="round"/><path d="M3.5 22 Q13 24.5 22.5 22 V29 Q22.5 32.5 19 32.5 H7 Q3.5 32.5 3.5 29 Z" fill="#0b2a17"/></svg>
+        <div><b>cave</b><small>Bench 06 · Mon 14 Dec</small></div>
+      </div>
+      <div class="pills">
+        <span class="pill gx time"><span class="mono">01:12</span></span>
+        <span class="pill gx">streak <span class="chip">5</span></span>
+      </div>
+    </header>
+
+    <section class="bench" aria-label="Flasks on the bench"></section>
+
+    <div class="side">
+      <section class="meas gx">
+        <div class="cap-t"><span>Time</span><small>today's bench</small></div>
+        <div class="num big">01:12</div>
+      </section>
+      <section class="meas gx">
+        <div class="cap-t"><span>Poured</span><small>of 5 flasks</small></div>
+        <div class="num mid">3<span style="font-size:.5em;opacity:.55">/5</span></div>
+        <div class="vb"><i></i></div>
+      </section>
+      <section class="ledger gx">
+        <div class="cap-t"><span>Ledger</span><small>4 notes · all must hold</small></div>
+        <ol>
+          <li><span class="t">01</span><span>The <span class="d" style="--c:#f0a12e"></span>honey sits immediately right of the <span class="d" style="--c:#e3cf5a"></span>oil.</span></li>
+          <li><span class="t">02</span><span>The <span class="d" style="--c:#4a2d6b"></span>poison sits immediately right of the <span class="d" style="--c:#f0a12e"></span>honey.</span></li>
+          <li><span class="t">03</span><span>Flask 5 holds the <span class="d" style="--c:#4a2d6b"></span>poison.</span></li>
+          <li><span class="t">04</span><span>The <span class="d" style="--c:#a9dcf2"></span>water sits immediately right of the <span class="d" style="--c:#b3264f"></span>wine.</span></li>
+        </ol>
+      </section>
+    </div>
+
+    <section class="liq gx" aria-label="Pour">
+      <div class="cap-t"><span>Liquids</span><small>tap a flask</small></div>
+      <div class="heads"><span></span><span></span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div>
+      <div class="subs"></div>
+    </section>
+
+    <div class="bar gx">
+      <div class="stat"><span class="dots"><b style="--c:#e3cf5a"></b><b style="--c:#f0a12e"></b><b style="--c:#4a2d6b"></b></span><span>Honey into flask 4</span></div>
+      <button class="go" disabled><i></i>Cap the rack <span class="k">3/5</span></button>
+    </div>
+  </div>
+</template>
+
+<script>
+  // Données de démo : generateCave('2026-12-14'), en cours de partie.
+  const LIQ = {
+    water:{ f:'H₂O', c:'#a9dcf2' }, wine:{ f:'C₂H₅OH', c:'#b3264f' }, oil:{ f:'C₁₈H₃₄O₂', c:'#e3cf5a' },
+    honey:{ f:'C₆H₁₂O₆', c:'#f0a12e' }, poison:{ f:'As₂O₃', c:'#4a2d6b' }
+  };
+  const ORDER = ['water','wine','oil','honey','poison'];
+  const POURED = [null, null, 'oil', 'honey', 'poison'];
+  const FRESH = 3;
+  let uid = 0;
+
+  // Flacon en verre soufflé, bouché de liège, posé sur le vert (pas de paillasse sombre).
+  function flaskSVG(content) {
+    const id = 'f' + (uid++);
+    const c = content ? LIQ[content].c : null;
+    const body = 'M15 20 V27 C15 32 5 33 5 41 V108 Q5 117 14 117 H34 Q43 117 43 108 V41 C43 33 33 32 33 27 V20 Z';
+    const liquid = 'M5.8 58 V108 Q5.8 116.2 14 116.2 H34 Q42.2 116.2 42.2 108 V58 Z';
+    return `<svg viewBox="0 0 48 124" aria-hidden="true">
+      <defs>
+        <linearGradient id="${id}g" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset=".22" stop-color="#fff" stop-opacity=".12"/><stop offset=".7" stop-color="#fff" stop-opacity=".06"/><stop offset="1" stop-color="#fff" stop-opacity=".4"/></linearGradient>
+        ${c ? `<linearGradient id="${id}l" x1="0" x2="1"><stop offset="0" stop-color="${c}" stop-opacity=".78"/><stop offset=".5" stop-color="${c}"/><stop offset="1" stop-color="${c}" stop-opacity=".82"/></linearGradient>` : ''}
+        <linearGradient id="${id}k" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#d8ad7c"/><stop offset="1" stop-color="#9c6d40"/></linearGradient>
+      </defs>
+      <ellipse cx="24" cy="119" rx="20" ry="3.4" fill="rgba(11,42,23,.22)"/>
+      ${c ? `<path d="${liquid}" fill="url(#${id}l)"/>
+             <ellipse cx="24" cy="58" rx="18.2" ry="2.6" fill="${c}"/>
+             <ellipse cx="24" cy="58" rx="18.2" ry="2.6" fill="#fff" opacity=".35"/>
+             <circle cx="15" cy="96" r="1.6" fill="#fff" opacity=".55"/><circle cx="19" cy="84" r="1.1" fill="#fff" opacity=".5"/><circle cx="30" cy="102" r="1.3" fill="#fff" opacity=".45"/>` : ''}
+      <path d="${body}" fill="url(#${id}g)" stroke="rgba(255,255,255,.85)" stroke-width="1.4"/>
+      <path d="M9.5 44 V104" stroke="#fff" stroke-opacity=".85" stroke-width="2.6" stroke-linecap="round"/>
+      <path d="M38 48 V70" stroke="#fff" stroke-opacity=".45" stroke-width="1.6" stroke-linecap="round"/>
+      <rect x="13" y="6" width="22" height="16" rx="3.5" fill="url(#${id}k)"/>
+      <rect x="13" y="6" width="22" height="3" rx="1.5" fill="#fff" opacity=".25"/>
+    </svg>`;
+  }
+  function flask(i, content, fresh) {
+    const cls = ['flask', content ? 'filled' : 'empty', fresh ? 'fresh' : ''].join(' ');
+    return `<div class="${cls}">${flaskSVG(content)}<span class="tagp gx"><span class="n">NO.${i + 1}</span><span class="nm">${content || 'unknown'}</span></span></div>`;
+  }
+  function mount(slot) {
+    const node = document.getElementById('game-tpl').content.cloneNode(true);
+    node.querySelector('.bench').innerHTML = POURED.map((c, i) => flask(i, c, i === FRESH)).join('');
+    node.querySelector('.subs').innerHTML = ORDER.map(l => {
+      let row = `<div class="sub"><span class="dot" style="--c:${LIQ[l].c}"></span><span class="nm">${l}<small>${LIQ[l].f}</small></span>`;
+      for (let f = 0; f < 5; f++) {
+        const on = POURED[f] === l;
+        const taken = !on && (POURED[f] !== null || POURED.includes(l));
+        row += `<button class="sq${on ? ' on' : ''}${taken ? ' taken' : ''}" aria-label="Pour ${l} into flask ${f + 1}">${f + 1}</button>`;
+      }
+      return row + '</div>';
+    }).join('');
+    slot.appendChild(node);
+  }
+  document.querySelectorAll('.slot').forEach(mount);
+
+  const wrap = (html, w) => `<div class="game" style="display:block;height:auto;padding:0;background:none;${w ? 'width:' + w + 'px' : ''}">${html}</div>`;
+  document.getElementById('states').innerHTML = `
+    <div class="state">${wrap(flask(0, null))}<em>Flacon vide</em></div>
+    <div class="state">${wrap(flask(1, 'wine'))}<em>Versé</em></div>
+    <div class="state">${wrap(flask(3, 'honey', true))}<em>Dernier versement</em></div>
+    <div class="state">${wrap(`<div style="display:flex;gap:6px"><button class="sq">1</button><button class="sq hover">2</button><button class="sq on">3</button><button class="sq taken">4</button></div>
+      <div style="height:14px"></div><button class="go" disabled><i></i>Cap the rack <span class="k">3/5</span></button>
+      <div style="height:8px"></div><button class="go"><i></i>Cap the rack <span class="k">5/5</span></button>`)}<em>Case · repos / survol / versé / occupé — bouton inactif / prêt</em></div>
+    <div class="state">${wrap(`<div class="res gx"><span class="chipx" style="background:#16a34a">rack complete</span><div class="num">01:47</div><p>Corked · streak 6.</p></div>
+      <div style="height:10px"></div><div class="res gx"><span class="chipx" style="background:#b91c1c">toxic mix</span><p>One liquid landed in the wrong flask. Re-pour and try again.</p></div>`)}<em>Résultat · gagné / raté</em></div>
+    <div class="state">${wrap(`<div class="loading gx"><div>Stoking the lamps…<div class="bub"><i></i><i></i><i></i></div></div></div>`)}<em>Chargement</em></div>`;
+
+  document.querySelectorAll('.scale-btn').forEach(b => b.addEventListener('click', () => {
+    const v = document.getElementById(b.dataset.target);
+    const full = v.style.getPropertyValue('--s') === '1';
+    v.style.setProperty('--s', full ? '.7' : '1');
+    b.textContent = full ? '1:1' : '70 %';
+  }));
+</script>
+</body>
+</html>
