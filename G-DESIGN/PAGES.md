@@ -6,7 +6,7 @@
 | # | Page | Rôle | Contenu clé | Statut |
 |---|------|------|-------------|--------|
 | 1 | **Post** | Vue dans le fil (`splash.html`, inline) : donner envie d'ouvrir l'expérience du jour | En-tête du post, n° du banc du jour, râtelier de 5 flacons fermés, série du joueur, bouton d'entrée (« Descend » aujourd'hui) | à dessiner |
-| 2 | **Jeu** | Écran principal (`game.html`, vue étendue). Une seule règle : « verse chaque liquide dans un flacon, chaque note du cahier doit tenir » | 5 flacons, 5 liquides (water, wine, oil, honey, poison), notes du cahier (indices), grille de versement liquide × flacon, chrono, série, bouton « Cap the rack » (n/5) | **en revue (3 directions V1)** |
+| 2 | **Jeu** | Écran principal (`game.html`, vue étendue). Une seule règle : « verse chaque liquide dans un flacon, chaque note du cahier doit tenir » | 5 flacons, 5 liquides (water, wine, oil, honey, poison), notes du cahier (indices), grille de versement liquide × flacon, chrono, série, bouton « Cap the rack » (n/5) | **en revue (V2 : design LabKit / Chemistry Lab, `planches/v2/01-verre-souffle.html`)** — V1 écartée |
 | 3 | **Carte de fin** | Résultat + boucle quotidienne + accroche commentaire | Gagné (« Rack complete ») ou raté (« Toxic mix », on peut reverser), temps, série, invitation à commenter en un geste, prochain banc | à dessiner |
 | 4 | **Séries & classement** | Montrer la série et les scores de la communauté | Série perso, scores communautaires du jour | à dessiner — **voir question 4** |
 

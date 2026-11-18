@@ -3,7 +3,31 @@
 > Journal de design. Versions datées, jamais écrasées. Tenu par Claude (prompt design, `PROMPT-DESIGN.md`).
 > Livrables : `G-DESIGN/` (PAGES, REFS, STYLE, planches).
 
-## V1 — 2026-11-18 — exploration du style sur la page « Jeu »
+## V2 — 2026-11-18 — page « Jeu » dans le design LabKit / Chemistry Lab
+
+**Statut** : en attente de validation par Gaia. Remplace la V1 (les 3 directions V1 sont écartées par Gaia).
+
+### Demande
+« Reprendre le design de LabKit du Chemistry Lab, mais pas son contenu. »
+
+### Livré
+- `G-DESIGN/planches/v2/01-verre-souffle.html` : page « Jeu », desktop 1440 × 900 + mobile 390 × 844, avec une bande d'états (flacon vide / versé / dernier versement, carrés, bouton inactif / prêt, résultat gagné / raté, chargement).
+- `G-DESIGN/_src/01-verre-souffle.src.html` + `build.py` : source de la planche. `build.py` y inline Archivo (`_src/fonts/archivo.woff2`, OFL) pour qu'elle s'ouvre sans réseau.
+- `G-DESIGN/REFS.md` : section LabKit (ce qui est repris, ce qui ne l'est pas).
+
+### Décisions
+- Design system repris tel quel : vert `#6cc95a`, encre `#0b2a17`, verre dépoli, pilules, Archivo condensé, légendes en mono, point `#ff5a3d` sur le bouton principal, verrerie soufflée sur le vert, desktop en 3 colonnes (liquides | paillasse | temps, versés, cahier).
+- Contenu propre à Cave : marque « cave » avec un pictogramme flacon bouché (pas de fantôme), 5 flacons bouchés de liège, 5 liquides colorés (water `#a9dcf2`, wine `#b3264f`, oil `#e3cf5a`, honey `#f0a12e`, poison `#4a2d6b`), cahier de 4 indices, carrés 1–5 par liquide pour verser.
+- Couleur d'un liquide = couleur de la substance, comme dans LabKit. Les liquides se distinguent aussi par la luminosité et par le nom écrit partout, donc pas seulement par la teinte.
+- Mobile : une colonne qui tient dans 756 px utiles (vérifié par script : 0 débordement, 0 texte coupé, 16 px sous la barre).
+- Mêmes données de démo que la V1 : `generateCave('2026-12-14')`, 3/5 versés.
+
+### Changelog V2
+- Flacons coupés à droite sur desktop → colonnes 300 / auto / 236 et flacons de 62 px.
+- Noms des liquides qui chevauchaient les carrés → colonne des liquides élargie, carrés de 32 px.
+- Texte d'état tronqué dans la barre → « Honey into flask 4 ».
+
+## V1 — 2026-11-18 — exploration du style sur la page « Jeu » (écartée)
 
 **Statut** : en attente de validation par Gaia (étape B du process). Rien n'est verrouillé.
 
