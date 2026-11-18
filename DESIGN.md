@@ -5,7 +5,7 @@
 
 ## V2.1 — 2026-11-18 — déclinaison du style validé sur les 3 autres pages
 
-**Statut** : style V2 validé par Gaia sur la page Jeu (« Approved, roll out »). Les 3 nouvelles planches sont en revue. Le style n'est pas verrouillé (`/lock` seulement quand toutes les pages seront validées).
+**Statut** : les 4 pages sont validées par Gaia le 2026-11-18 (« Approved, push »). Le style n'est pas encore verrouillé : `/lock` reste possible, les questions produit 4, 7 et 8 de PAGES.md restent ouvertes.
 
 ### Livré
 - `G-DESIGN/STYLE.md` : palette, typo, grille, composants, mouvement, règles d'états.
